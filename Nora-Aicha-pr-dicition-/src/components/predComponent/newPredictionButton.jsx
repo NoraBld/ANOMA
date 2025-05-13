@@ -21,10 +21,82 @@ const NewPredictionButton = () => {
     },
   };
 
-  const handleValidate = () => {
+ 
+
+// const handleValidate = async () => {
+//   const formData = new FormData();
+//   // formData.append("type_modele", selectedMethod);
+//   formData.append("periode", predictionPeriod);
+//   if (file) {
+//     formData.append("fichier", file);
+//     console.log(file)
+//   }
+
+//   try {
+//     console.log("Début")
+//     const response = await fetch("http://localhost:8000/predict", {
+      
+//       method: "POST",
+//       body: formData,
+//     });
+//     console.log("bloc1")
+//     if (!response.ok) {
+//       console.log("bloc1")
+//       throw new Error("Échecccccc de la prédiction");
+//     }
+
+//     const data = await response.json();
+//     console.log("bloc2")
+//     console.log("Réponse du serveur extraction de donnees :", data);
+//     alert("Prédiction lancée avec succès !");
+    
+//     // Tu peux aussi stocker la prédiction reçue ou l'afficher
+//     // setPredictionResult(data);
+
+//     setShowForm(false);
+//     setShowModel(true);
+
+//   } catch (error) {
+//     console.log("bloc3")
+//     console.error("Erreur réseau :", error);
+//     alert("Une erreur est survenue lors de la prédiction.");
+//   }
+// };
+const handleValidate = async () => {
+  const formData = new FormData();
+  // formData.append("type_modele", selectedMethod);
+  formData.append("periode", predictionPeriod);
+  if (file) {
+    formData.append("fichier", file);
+    console.log(file)
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/predict", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Échecccccc de la prédiction");
+    }
+
+    const data = await response.json();
+    console.log("Réponse du serveur :", data);
+    alert("Prédiction lancée avec succès !");
+    
+    // Tu peux aussi stocker la prédiction reçue ou l'afficher
+    // setPredictionResult(data);
+
     setShowForm(false);
     setShowModel(true);
-  };
+
+  } catch (error) {
+    console.error("Erreur réseau :", error);
+    alert("Une erreur est survenue lors de la prédiction.");
+  }
+}; 
+
 
   return (
     <div className="mb-8">
@@ -97,7 +169,7 @@ const NewPredictionButton = () => {
 
                 <div>
                   <label className="block mb-1 font-medium" style={{ color: '#162556' }}>Importer fichier (facultatif)</label>
-                  <input
+                  <input  
                     type="file"
                     accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     onChange={(e) => setFile(e.target.files[0])}
