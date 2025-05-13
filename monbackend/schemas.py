@@ -20,3 +20,13 @@ class UtilisateurUpdate(BaseModel):
     mot_de_passe: Optional[str]
     secteur: Optional[str]
     photo_profil: Optional[str]
+
+
+
+
+
+class PredictionSarimax(BaseModel):
+
+    # type_modele: str  # "ARIMA", "SARIMA", "SARIMAX"
+    periode : int 
+  
