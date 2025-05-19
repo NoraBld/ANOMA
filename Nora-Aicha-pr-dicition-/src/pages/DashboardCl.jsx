@@ -3,17 +3,16 @@
 import React from 'react';
 import { ProSidebarProvider } from 'react-pro-sidebar';
 import CustomSidebar from '../components/CustomSidebar';
-// import Cartesinfo from '../components/dashComponent/Cartesinfo';
-// import SalesChart from '../components/dashComponent/SalesChart';
-import PredictionGraph from '../components/dashComponent/PredictionGraph';
+
+import PredictionGraph from '../components/dashComponentCl/PredictionGraph';
 // import VolumeServiceChart from '../components/dashComponent/VolumeServiceChart';
 // import TableauJournee from '../components/dashComponent/tableaujournee';
-import BottomStats from '../components/dashComponent/BottomStats';
-import ConsumptionTable from '../components/dashComponent/ConsumptionTable';
-import RealVsPredictedGraph from '../components/dashComponent/RealVsPredictedGraph';
+import BottomStats from '../components/dashComponentCl/BottomStats';
+import ConsumptionTable from '../components/dashComponentCl/ConsumptionTable';
+import RealVsPredictedGraph from '../components/dashComponentCl/RealVsPredictedGraph';
 // import RevenueChart from '../components/RevenueChart';
-import ConsumptionBarChart from '../components/dashComponent/ConsumptionBarChart';
-export default function Dashboard() {
+
+export default function DashboardCl() {
 
     const salesData = [
         { datetime: '2004-12-25 01:00:00', value: 16669.0 },
@@ -135,10 +134,10 @@ export default function Dashboard() {
   <div className="w-full lg:w-1/2 p-4 text-white">
     <ConsumptionTable />
   </div>
-
+    
 </div>
-<ConsumptionBarChart />
-       
+
+       <RealVsPredictedGraph/>
  
       </div>
 
@@ -210,6 +209,8 @@ export default function Dashboard() {
 
                 {/* </div>
             </div> */}
+        
         </div>
+        
     );
 }

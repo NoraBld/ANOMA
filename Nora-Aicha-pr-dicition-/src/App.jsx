@@ -12,9 +12,10 @@ import Historique from './pages/Historique';
 import Acceuil from './pages/acceuil';
 import Dashboard from './pages/dashboard';
 import Profile from './pages/Profile';
-
-
-
+import ProfileCl from './pages/profileCl';
+import VisualisationCl from './pages/visualisationCl';
+import DashboardCl from './pages/dashboardCl';
+import Client from './pages/Client';
 function App() {
   return (
     <BrowserRouter>
@@ -25,6 +26,10 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/prediction" element={<Prediction />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/ProfileCl" element={<ProfileCl />} />
+        <Route path="/VisualisationCl" element={<VisualisationCl />} />
+        <Route path="/dashboardCl" element={<DashboardCl />} />
+        <Route path="Client" element={<Client />} />
       </Routes>
     </BrowserRouter>
   );

@@ -24,8 +24,7 @@ const BottomStats = () => {
 
           {index === 1 && (
             <>
-             
- <div className="flex flex-col items-center justify-center h-full">
+              <div className="flex flex-col items-center justify-center h-full">
               <h3 className="text-lg font-semibold mb-2 text-[#e7d5ac]">Taux d'erreur moyen des modèles de pédiction</h3>
               <div className="relative w-24 h-24">
                 <svg className="transform -rotate-90" width="100%" height="100%" viewBox="0 0 36 36">
@@ -54,6 +53,7 @@ const BottomStats = () => {
                 </div>
               </div>
             </div>
+
 
 {/* </div> */}
 

@@ -211,4 +211,5 @@ const handleValidate = async () => {
   );
 };
 
+
 export default NewPredictionButton;

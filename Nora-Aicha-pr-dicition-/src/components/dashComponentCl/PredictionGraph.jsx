@@ -20,10 +20,10 @@ const data = [
   { date: '2024-06', valeur: 138 },
   { date: '2024-07', valeur: 142 },
   { date: '2024-08', valeur: 145 },
-  { date: '2024-09', valeur: 148 },
-  { date: '2024-10', valeur: 152 },
-  { date: '2024-11', valeur: 158 },
-  { date: '2024-12', valeur: 161 },
+  { date: '2024-09', prediction: 148 },
+  { date: '2024-10', prediction: 152 },
+  { date: '2024-11', prediction: 158 },
+  { date: '2024-12', prediction: 161 },
 ];
 
 const PredictionGraph = () => {
@@ -52,11 +52,19 @@ const PredictionGraph = () => {
                 stroke="#424769"
                 strokeWidth={2}
               />
-              
+              <Line
+                type="monotone"
+                dataKey="prediction"
+                name="Prédiction (périodes futures)"
+                stroke="#f9b17a"
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
 
-          
+          <p className="text-sm text-black italic mt-4 ml-2">
+            🔶 La lignes orange représentent les valeurs prédites pour les prochaines périodes.
+          </p>
 
           <div className="ml-4 mt-16 space-y-4 text-sm">
  
@@ -68,11 +76,6 @@ const PredictionGraph = () => {
           <GraphStats data={data} />
         </div>
       </div>
-      <p className="text-sm text-black italic mt-4 ml-2 flex items-center gap-2">
-  <TrendingUp size={16} className="text-[#FCB17A]" />
-  Vous allez produire <strong>2 301 919 W</strong> d’énergie.
-</p>
-
     </div>
   );
 };

@@ -11,15 +11,15 @@ const GraphStats = ({ data }) => {
   return (
     <div className="flex flex-col  h-full  ml-10 mt-0 mb-0">
       <div className={cardStyle}>
-        <div className=" bg-[#636785] text-sm font-semibold">Nombre total des clients</div>
+        <div className=" bg-[#636785] text-sm font-semibold">Total des prédictions</div>
         <div className="text-lg font-bold">{total}</div>
       </div>
       <div className={cardStyle}>
-        <div className="text-sm font-semibold">Consommation moyenne par année</div>
+        <div className="text-sm font-semibold">Date de la derniere prédiction</div>
         <div className="text-lg font-bold">{lastDate}</div>
       </div>
       <div className={cardStyle}>
-        <div className="text-sm font-semibold">Consommation moyenne par mois</div>
+        <div className="text-sm font-semibold">Durée de la derniere prédiction</div>
         <div className="text-lg font-bold">{duration}</div>
       </div>
     </div>

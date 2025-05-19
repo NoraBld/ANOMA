@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar as ProSidebar, Menu, MenuItem, useProSidebar } from 'react-pro-sidebar';
-import { FaBars, FaHome, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import {
+  FaBars,
+  FaHome,
+  FaUser,
+  FaTachometerAlt,
+  FaChartLine,
+  FaRobot,
+  FaSignOutAlt
+} from 'react-icons/fa';
 import LogoProfil from '../assets/images/portrait.jpg';
 import '../assets/css/CustomSidebar.css';
 import { Link } from 'react-router-dom';
 
-function CustomSidebar() {
+function CustomSidebarCl() {
   const { collapseSidebar } = useProSidebar();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768); 
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
@@ -60,18 +68,25 @@ function CustomSidebar() {
       <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <Menu menuItemStyles={menuStyles}>
           <div style={{ height: '60px' }}></div>
+
           <MenuItem 
             component={<Link to="/profile" />} 
-            icon={ <img src={LogoProfil} alt="Profil" style={{ width: '25px', height: '25px', borderRadius: '50%' }} />}
+            icon={<img src={LogoProfil} alt="Profil" style={{ width: '25px', height: '25px', borderRadius: '50%' }} />}
           >
             Profil
           </MenuItem>
+
+          <MenuItem icon={<FaHome />} component={<Link to="/visualisationCl" />}>
+            Visualisation
+          </MenuItem>
+
           
-          <MenuItem icon={<FaHome />} component={<Link to="/dashboard" />}>Dashboard</MenuItem>
-          <MenuItem icon={<FaHome />} component={<Link to="/dashboardCl" />}>Dashboard de Prédicition</MenuItem>
-          <MenuItem icon={<FaCog />} component={<Link to="/prediction" />}>Prédiction</MenuItem>
-          <MenuItem icon={<FaUser />} component={<Link to="/historique" />}>Historique</MenuItem>
-          <MenuItem icon={<FaUser />} component={<Link to="/Client" />}>Client</MenuItem>
+
+          <MenuItem icon={<FaChartLine />} component={<Link to="" />}>
+            Historique
+          </MenuItem>
+
+          
         </Menu>
 
         <div style={{ flexGrow: 1 }}></div>
@@ -84,4 +99,4 @@ function CustomSidebar() {
   );
 }
 
-export default CustomSidebar;
+export default CustomSidebarCl;
