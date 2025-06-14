@@ -1,0 +1,418 @@
+
+import React, { useState, useEffect } from "react";
+import { ProSidebarProvider } from "react-pro-sidebar";
+import CustomSidebar from "../components/CustomSidebar";
+import SearchAddBar from "../components/listClient/SearchAddBar";
+import AddClientModal from "../components/listClient/AddClientModal";
+import ClientTable from "../components/listClient/ClientTable";
+import { Dialog } from "@headlessui/react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+
+const Client = () => {
+  const [clients, setClients] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [addClientOpen, setAddClientOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const consommationDataByClient = {
+    // Exemple statique, à remplacer
+  };
+
+  const fetchClients = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/clients");
+      if (!response.ok) throw new Error("Erreur lors de la récupération");
+      const data = await response.json();
+      setClients(data);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur chargement des clients");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const handleEdit = (client) => alert("Modifier: " + client.nom);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Confirmer suppression ?")) return;
+    try {
+      const res = await fetch(`http://localhost:8000/clients/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Erreur suppression");
+      setClients((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      alert("Erreur suppression");
+    }
+  };
+
+  const openModal = (client) => {
+    setSelectedClient(client);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedClient(null);
+    setModalOpen(false);
+  };
+
+  const data = selectedClient ? consommationDataByClient[selectedClient.id] || [] : [];
+
+  return (
+    <ProSidebarProvider>
+      <div className="flex flex-col sm:flex-row bg-[#E5E5E5] min-h-screen">
+        <CustomSidebar />
+        <main className="p-4 sm:p-6 w-full overflow-x-auto">
+          <SearchAddBar
+            onAdd={() => setAddClientOpen(true)}
+            onSearch={(q) => console.log("Recherche :", q)}
+          />
+          {loading ? (
+            <div className="text-center py-10">Chargement des clients...</div>
+          ) : (
+            <div className="overflow-x-auto mt-4">
+              <ClientTable
+                clients={clients}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onViewConsumption={openModal}
+              />
+            </div>
+          )}
+        </main>
+        <AddClientModal
+          isOpen={addClientOpen}
+          onClose={() => setAddClientOpen(false)}
+          setClients={setClients}
+        />
+        <Dialog open={modalOpen} onClose={closeModal} className="relative z-50">
+          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Dialog.Panel className="bg-white p-6 rounded-xl shadow-lg max-w-xl w-full">
+              <Dialog.Title className="text-xl font-semibold text-[#0F1A3C] mb-4">
+                Consommation de {selectedClient?.prenom} {selectedClient?.nom}
+              </Dialog.Title>
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data}>
+                    <CartesianGrid stroke="#ccc" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="valeur" stroke="#8884d8" name="Réelle" />
+                    <Line type="monotone" dataKey="prediction" stroke="#82ca9d" name="Prédite" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      </div>
+    </ProSidebarProvider>
+  );
+};
+
+export default Client;
+
+
+
+
+
+import React, { useState } from "react";
+import { Dialog } from "@headlessui/react";
+
+const AddClientModal = ({ isOpen, onClose, setClients }) => {
+  const [form, setForm] = useState({
+    nom: "",
+    prenom: "",
+    adresse: "",
+    telephone: "",
+    email: "",
+    motdepasse: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAddClient = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("http://localhost:8000/clients", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": "Bearer dummy" // à enlever si pas d'auth
+        },
+        body: JSON.stringify({
+          ...form,
+          telephone: String(form.telephone),
+        }),
+      });
+
+      console.log("Response status:", response.status);
+
+      if (response.status === 500) {
+        alert("Erreur serveur ");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Erreur: ${errorData.detail || "Inconnue"}`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Données reçues:", data);
+
+      setClients((prev) => [...prev, data]);
+
+      setForm({
+        nom: "",
+        prenom: "",
+        adresse: "",
+        telephone: "",
+        email: "",
+        motdepasse: "",
+      });
+
+      onClose();
+      alert("Client ajouté avec succès ! 🎉");
+    } catch (error) {
+      console.error("Erreur complète:", error);
+      alert("Erreur réseau");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const inputClass = (value) =>
+    `w-full p-2 border rounded-xl text-[#0F1A3C] ${
+      value ? "bg-[#E8F0FE]" : "bg-transparent"
+    } focus:outline-none focus:ring-2 focus:ring-[#FCB17A] transition-colors duration-200`;
+
+  return (
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div className="fixed inset-0 flex items-center justify-center px-4">
+        <Dialog.Panel className="bg-white p-6 rounded-xl shadow-xl w-full max-w-lg sm:max-w-md">
+          <Dialog.Title className="text-xl font-semibold mb-4 text-[#0F1A3C]">
+            Ajouter un client
+          </Dialog.Title>
+
+          <div className="space-y-4">
+            {["nom", "prenom", "adresse", "telephone", "email", "motdepasse"].map((field) => (
+              <input
+                key={field}
+                type={
+                  field === "motdepasse"
+                    ? "password"
+                    : field === "email"
+                    ? "email"
+                    : field === "telephone"
+                    ? "tel"
+                    : "text"
+                }
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                placeholder={
+                  field === "motdepasse"
+                    ? "Mot de passe"
+                    : field.charAt(0).toUpperCase() + field.slice(1)
+                }
+                className={inputClass(form[field])}
+                required
+                disabled={isSubmitting}
+              />
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 transition"
+              disabled={isSubmitting}
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleAddClient}
+              className="px-4 py-2 bg-[#FCB17A] text-white rounded-xl hover:bg-[#e89a52] transition"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Ajout en cours..." : "Ajouter"}
+            </button>
+          </div>
+        </Dialog.Panel>
+      </div>
+    </Dialog>
+  );
+};
+
+export default AddClientModal;
+
+
+
+
+
+from typing import Optional
+
+
+
+from pydantic import BaseModel, EmailStr , Field
+
+
+class ClientCreate(BaseModel):
+    nom: str = Field(..., min_length=1, description="Nom obligatoire")
+    prenom: str = Field(..., min_length=1)
+    adresse: str = Field(..., min_length=1)
+    telephone: str = Field(..., min_length=1)
+    email: EmailStr  
+    motdepasse: str = Field(..., min_length=6) 
+class ClientOut(BaseModel):
+    id: int
+    nom: str
+    prenom: str
+    adresse: str
+    telephone: str
+    email: EmailStr
+
+    class Config:
+        orm_mode = True
+
+class ClientUpdate(BaseModel):
+    nom: Optional[str]
+    prenom: Optional[str]
+    adresse: Optional[str]
+    telephone: Optional[str]
+    email: Optional[EmailStr]
+    motdepasse: Optional[str]
+
+    class Config:
+        orm_mode = True
+class PredictionSarimax(BaseModel):
+
+    # type_modele: str  # "ARIMA", "SARIMA", "SARIMAX"
+    periode : int 
+  
+
+
+
+from sqlalchemy import Column, Integer, String
+# from .database import Base
+from database import Base
+
+
+class Client(Base):
+    __tablename__ = "clients"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    nom = Column(String)
+    prenom = Column(String)
+    adresse = Column(String)
+    telephone = Column(String)
+    email = Column(String, unique=True, index=True)
+    password = Column(String)
+
+
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
+import models
+from database import engine, SessionLocal
+from routers import prediction, ajouterClient 
+
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Adresse du frontend React
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(ajouterClient.router)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
+import schemas
+import models
+from database import get_db
+
+router = APIRouter()
+
+@router.post("/clients", response_model=schemas.ClientOut)
+def create_client(client: schemas.ClientCreate, db: Session = Depends(get_db)):
+    existing_client = db.query(models.Client).filter(models.Client.email == client.email).first()
+    if existing_client:
+        raise HTTPException(status_code=400, detail="Email déjà utilisé")
+
+    db_client = models.Client(
+        nom=client.nom,
+        prenom=client.prenom,
+        adresse=client.adresse,
+        telephone=client.telephone,
+        email=client.email,
+        password=client.motdepasse
+    )
+    db.add(db_client)
+    db.commit()
+    db.refresh(db_client)
+    return db_client
+
+@router.get("/clients", response_model=List[schemas.ClientOut])
+def read_clients(db: Session = Depends(get_db)):
+    return db.query(models.Client).all()
+
+@router.delete("/clients/{client_id}")
+def delete_client(client_id: int, db: Session = Depends(get_db)):
+    client = db.query(models.Client).filter(models.Client.id == client_id).first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Client non trouvé")
+    db.delete(client)
+    db.commit()
+    return {"message": "Client supprimé avec succès"}
+
+
+
+

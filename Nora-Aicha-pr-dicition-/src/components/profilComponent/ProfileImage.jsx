@@ -28,10 +28,16 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
   };
 
   return (
-    <div className="relative flex flex-col items-center mb-8 p-6 rounded shadow-md w-full" style={{ backgroundColor: '#8D91AB', minHeight: '500px' }}>
+    <div
+      className="relative flex flex-col items-center mb-8 p-6 rounded shadow-md w-full"
+      style={{ backgroundColor: '#8D91AB', minHeight: '500px' }}
+    >
       <div className="relative w-32 h-32 mb-4">
         <img src={profilePic} alt="Profil" className="w-full h-full rounded-full object-cover" />
-        <div onClick={() => document.getElementById('fileInput').click()} className="absolute bottom-0 right-0 bg-[#000229] p-2 rounded-full cursor-pointer">
+        <div
+          onClick={() => document.getElementById('fileInput').click()}
+          className="absolute bottom-0 right-0 bg-[#000229] p-2 rounded-full cursor-pointer"
+        >
           <FaPen size={16} color="#FCB17A" />
         </div>
       </div>
@@ -76,7 +82,11 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
           </div>
         </div>
 
-        <button onClick={handlePasswordToggle} className="mt-4 text-white px-4 py-2 rounded hover:brightness-110" style={{ backgroundColor: '#FCB17A' }}>
+        <button
+          onClick={handlePasswordToggle}
+          className="mt-4 text-white px-4 py-2 rounded hover:brightness-110 w-full md:w-auto"
+          style={{ backgroundColor: '#FCB17A' }}
+        >
           Modifier le mot de passe
         </button>
 
@@ -102,7 +112,11 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
                 className="w-full p-2 rounded text-black"
               />
             </div>
-            <button onClick={handleSubmit} className="text-white px-4 py-2 mt-2 rounded hover:brightness-110" style={{ backgroundColor: '#FCB17A' }}>
+            <button
+              onClick={handleSubmit}
+              className="text-white px-4 py-2 mt-2 rounded hover:brightness-110 w-full md:w-auto"
+              style={{ backgroundColor: '#FCB17A' }}
+            >
               Valider
             </button>
           </div>
@@ -110,6 +124,7 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
       </div>
 
       <FileTable files={files} />
+
       <style>{`
         .custom-label {
           color: #2D3250;

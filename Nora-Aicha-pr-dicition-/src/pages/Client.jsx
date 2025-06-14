@@ -1,9 +1,540 @@
-import React, { useState } from "react";
+
+// import React, { useState, useEffect } from "react";
+// import { ProSidebarProvider } from "react-pro-sidebar";
+// import CustomSidebar from "../components/CustomSidebar";
+// import SearchAddBar from "../components/listClient/SearchAddBar";
+// import AddClientModal from "../components/listClient/AddClientModal";
+// import ClientTable from "../components/listClient/ClientTable";
+// import ModifierModal from "../components/listClient/ModifierModal";
+// import SelectionnerClient from "../components/listClient/SelectionnerClient";
+// import RenouvelerModele from "../components/listClient/renouvelerModele";
+
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+//   CartesianGrid,
+// } from "recharts";
+
+// const Client = () => {
+//   const [clients, setClients] = useState([]);
+//   const [filteredClients, setFilteredClients] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [selectedClient, setSelectedClient] = useState(null);
+//   const [addClientOpen, setAddClientOpen] = useState(false);
+//   const [editModalOpen, setEditModalOpen] = useState(false);
+//   const [clientToEdit, setClientToEdit] = useState(null);
+//   const [selectedClients, setSelectedClients] = useState([]);
+//   const [consommationData, setConsommationData] = useState([]);
+
+//   const fetchClients = async () => {
+//     setLoading(true);
+//     try {
+//       const res = await fetch("http://localhost:8000/clients");
+//       if (!res.ok) throw new Error("Erreur lors de la récupération");
+//       const data = await res.json();
+//       setClients(data);
+//       setFilteredClients(data);
+//     } catch (err) {
+//       alert("Erreur chargement des clients");
+//       console.error(err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchClients();
+//   }, []);
+
+//   const handleSearch = (query) => {
+//     if (!query) {
+//       setFilteredClients(clients);
+//       return;
+//     }
+//     const q = query.toLowerCase();
+//     const filtered = clients.filter(
+//       (c) =>
+//         c.nom.toLowerCase().includes(q) ||
+//         c.prenom.toLowerCase().includes(q) ||
+//         c.codeClient.toString().includes(q)
+//     );
+//     setFilteredClients(filtered);
+//   };
+
+//   const handleEditClick = (client) => {
+//     setClientToEdit(client);
+//     setEditModalOpen(true);
+//   };
+
+//   const closeEditModal = () => {
+//     setClientToEdit(null);
+//     setEditModalOpen(false);
+//   };
+
+//   const handleDelete = async (id) => {
+//     if (!window.confirm("Confirmer suppression ?")) return;
+//     try {
+//       const res = await fetch(`http://localhost:8000/clients/${id}`, {
+//         method: "DELETE",
+//       });
+//       if (!res.ok) throw new Error("Erreur suppression");
+//       setClients((prev) => prev.filter((c) => c.id !== id));
+//       setFilteredClients((prev) => prev.filter((c) => c.id !== id));
+//       setSelectedClients((prev) => prev.filter((sid) => sid !== id));
+//     } catch (err) {
+//       alert("Erreur suppression");
+//       console.error(err);
+//     }
+//   };
+
+//   const handleSelectClient = (id, checked) => {
+//     if (checked) {
+//       setSelectedClients((prev) => [...prev, id]);
+//     } else {
+//       setSelectedClients((prev) => prev.filter((sid) => sid !== id));
+//     }
+//   };
+
+//   const handleSelectAll = (checked) => {
+//     if (checked) {
+//       setSelectedClients(filteredClients.map((c) => c.id));
+//     } else {
+//       setSelectedClients([]);
+//     }
+//   };
+
+//   const handleDeleteSelected = async () => {
+//     if (
+//       selectedClients.length === 0 ||
+//       !window.confirm("Confirmer la suppression des clients sélectionnés ?")
+//     )
+//       return;
+
+//     try {
+//       for (const id of selectedClients) {
+//         const res = await fetch(`http://localhost:8000/clients/${id}`, {
+//           method: "DELETE",
+//         });
+//         if (!res.ok) throw new Error(`Erreur suppression client ${id}`);
+//       }
+//       setClients((prev) => prev.filter((c) => !selectedClients.includes(c.id)));
+//       setFilteredClients((prev) =>
+//         prev.filter((c) => !selectedClients.includes(c.id))
+//       );
+//       setSelectedClients([]);
+//     } catch (err) {
+//       alert("Erreur lors de la suppression des clients sélectionnés");
+//       console.error(err);
+//     }
+//   };
+
+//   const openConsumptionModal = async (client) => {
+//     setSelectedClient(client);
+//     setModalOpen(true);
+//     try {
+//       const res = await fetch(`http://localhost:8000/clients/${client.id}/consommations`);
+//       if (!res.ok) throw new Error("Erreur récupération consommation");
+//       const data = await res.json();
+
+//       // Format "MM/YYYY"
+//       const formatted = data.map((item) => ({
+//         ...item,
+//         date: `${String(item.mois).padStart(2, "0")}/${item.annee}`,
+//       }));
+
+//       setConsommationData(formatted);
+//     } catch (err) {
+//       alert("Impossible de récupérer les données de consommation.");
+//       console.error(err);
+//       setConsommationData([]);
+//     }
+//   };
+
+//   const closeConsumptionModal = () => {
+//     setSelectedClient(null);
+//     setModalOpen(false);
+//   };
+
+//   return (
+//     <ProSidebarProvider>
+//       <div className="flex min-h-screen bg-[#E5E5E5]">
+//         <CustomSidebar />
+//         <div className="flex flex-col flex-1 overflow-hidden">
+//           <main className="flex flex-col p-4 sm:p-6 h-full">
+//             <SearchAddBar onAdd={() => setAddClientOpen(true)} onSearch={handleSearch} />
+//             <div className="flex items-center justify-between mt-4">
+//               <SelectionnerClient
+//                 selectedCount={selectedClients.length}
+//                 totalCount={filteredClients.length}
+//                 onSelectAll={() => handleSelectAll(selectedClients.length !== filteredClients.length)}
+//                 onDeleteSelected={handleDeleteSelected}
+//               />
+//               <div className="ml-auto">
+//                 <RenouvelerModele />
+//               </div>
+//             </div>
+
+//             <div className="flex-1 overflow-y-auto mt-4">
+//               {loading ? (
+//                 <div className="text-center py-10">Chargement des clients...</div>
+//               ) : (
+//                 <ClientTable
+//                   clients={filteredClients}
+//                   selectedClients={selectedClients}
+//                   onSelectClient={handleSelectClient}
+//                   onEdit={handleEditClick}
+//                   onDelete={handleDelete}
+//                   onViewConsumption={openConsumptionModal}
+//                   onSelectAll={handleSelectAll}
+//                 />
+//               )}
+//             </div>
+//           </main>
+//         </div>
+
+//         <AddClientModal
+//           isOpen={addClientOpen}
+//           onClose={() => setAddClientOpen(false)}
+//           setClients={setClients}
+//         />
+
+//         <ModifierModal
+//           isOpen={editModalOpen}
+//           onClose={closeEditModal}
+//           clientToEdit={clientToEdit}
+//           setClients={setClients}
+//         />
+
+//         {modalOpen && (
+//   <div
+//     className="fixed top-10 left-1/2 transform -translate-x-1/2 bg-white p-6 rounded-xl shadow-lg max-w-6xl w-full z-50 h-[80vh] overflow-y-auto"
+//   >
+
+//             <h2 className="text-xl font-semibold text-[#0F1A3C] mb-4">
+//               Consommation de {selectedClient?.prenom} {selectedClient?.nom}
+//             </h2>
+//             <div className="w-full h-64">
+//               <ResponsiveContainer width="100%" height="100%">
+//                 <LineChart data={consommationData}>
+//                   <CartesianGrid stroke="#ccc" />
+//                   <XAxis
+//                     dataKey="date"
+//                     angle={-45}
+//                     textAnchor="end"
+//                     interval={0}
+//                     type="category"
+//                     tickFormatter={(tick) => tick}
+//                   />
+//                   <YAxis />
+//                   <Tooltip />
+//                   <Line
+//                     type="monotone"
+//                     dataKey="valeur"
+//                     stroke="#8884d8"
+//                     name="Réelle"
+//                   />
+//                   <Line
+//                     type="monotone"
+//                     dataKey="prediction"
+//                     stroke="#82ca9d"
+//                     name="Prédite"
+//                   />
+//                 </LineChart>
+//               </ResponsiveContainer>
+//             </div>
+//             <button
+//               onClick={closeConsumptionModal}
+//               className="mt-4 px-4 py-2 bg-[#FCB17A] rounded text-white hover:bg-[#e99a5a]"
+//             >
+//               Fermer
+//             </button>
+//           </div>
+//         )}
+//       </div>
+//     </ProSidebarProvider>
+//   );
+// };
+
+// export default Client;
+
+
+
+
+
+// import React, { useState, useEffect } from "react";
+// import { ProSidebarProvider } from "react-pro-sidebar";
+// import CustomSidebar from "../components/CustomSidebar";
+// import SearchAddBar from "../components/listClient/SearchAddBar";
+// import AddClientModal from "../components/listClient/AddClientModal";
+// import ClientTable from "../components/listClient/ClientTable";
+// import ModifierModal from "../components/listClient/ModifierModal";
+// import SelectionnerClient from "../components/listClient/SelectionnerClient";
+// import RenouvelerModele from "../components/listClient/renouvelerModele";
+
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+//   CartesianGrid,
+// } from "recharts";
+
+// const Client = () => {
+//   const [clients, setClients] = useState([]);
+//   const [filteredClients, setFilteredClients] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const [modalOpen, setModalOpen] = useState(false);
+//   const [selectedClient, setSelectedClient] = useState(null);
+//   const [addClientOpen, setAddClientOpen] = useState(false);
+//   const [editModalOpen, setEditModalOpen] = useState(false);
+//   const [clientToEdit, setClientToEdit] = useState(null);
+//   const [selectedClients, setSelectedClients] = useState([]);
+//   const [consommationData, setConsommationData] = useState([]);
+
+//   const fetchClients = async () => {
+//     setLoading(true);
+//     try {
+//       const res = await fetch("http://localhost:8000/clients");
+//       if (!res.ok) throw new Error("Erreur lors de la récupération");
+//       const data = await res.json();
+//       setClients(data);
+//       setFilteredClients(data);
+//     } catch (err) {
+//       alert("Erreur chargement des clients");
+//       console.error(err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchClients();
+//   }, []);
+
+//   const handleSearch = (query) => {
+//     if (!query) {
+//       setFilteredClients(clients);
+//       return;
+//     }
+//     const q = query.toLowerCase();
+//     const filtered = clients.filter(
+//       (c) =>
+//         c.nom.toLowerCase().includes(q) ||
+//         c.prenom.toLowerCase().includes(q) ||
+//         c.codeClient.toString().includes(q)
+//     );
+//     setFilteredClients(filtered);
+//   };
+
+//   const handleEditClick = (client) => {
+//     setClientToEdit(client);
+//     setEditModalOpen(true);
+//   };
+
+//   const closeEditModal = () => {
+//     setClientToEdit(null);
+//     setEditModalOpen(false);
+//   };
+
+//   const handleDelete = async (id) => {
+//     if (!window.confirm("Confirmer suppression ?")) return;
+//     try {
+//       const res = await fetch(`http://localhost:8000/clients/${id}`, {
+//         method: "DELETE",
+//       });
+//       if (!res.ok) throw new Error("Erreur suppression");
+//       setClients((prev) => prev.filter((c) => c.id !== id));
+//       setFilteredClients((prev) => prev.filter((c) => c.id !== id));
+//       setSelectedClients((prev) => prev.filter((sid) => sid !== id));
+//     } catch (err) {
+//       alert("Erreur suppression");
+//       console.error(err);
+//     }
+//   };
+
+//   const handleSelectClient = (id, checked) => {
+//     if (checked) {
+//       setSelectedClients((prev) => [...prev, id]);
+//     } else {
+//       setSelectedClients((prev) => prev.filter((sid) => sid !== id));
+//     }
+//   };
+
+//   const handleSelectAll = (checked) => {
+//     if (checked) {
+//       setSelectedClients(filteredClients.map((c) => c.id));
+//     } else {
+//       setSelectedClients([]);
+//     }
+//   };
+
+//   const handleDeleteSelected = async () => {
+//     if (
+//       selectedClients.length === 0 ||
+//       !window.confirm("Confirmer la suppression des clients sélectionnés ?")
+//     )
+//       return;
+
+//     try {
+//       for (const id of selectedClients) {
+//         const res = await fetch(`http://localhost:8000/clients/${id}`, {
+//           method: "DELETE",
+//         });
+//         if (!res.ok) throw new Error(`Erreur suppression client ${id}`);
+//       }
+//       setClients((prev) => prev.filter((c) => !selectedClients.includes(c.id)));
+//       setFilteredClients((prev) =>
+//         prev.filter((c) => !selectedClients.includes(c.id))
+//       );
+//       setSelectedClients([]);
+//     } catch (err) {
+//       alert("Erreur lors de la suppression des clients sélectionnés");
+//       console.error(err);
+//     }
+//   };
+
+//   const openConsumptionModal = async (client) => {
+//     setSelectedClient(client);
+//     setModalOpen(true);
+//     try {
+//       const res = await fetch(`http://localhost:8000/clients/${client.id}/consommations`);
+//       if (!res.ok) throw new Error("Erreur récupération consommation");
+//       const data = await res.json();
+
+//       const formatted = data.map((item) => ({
+//         ...item,
+//         date: `${String(item.mois).padStart(2, "0")}/${item.annee}`,
+//       }));
+
+//       setConsommationData(formatted);
+//     } catch (err) {
+//       alert("Impossible de récupérer les données de consommation.");
+//       console.error(err);
+//       setConsommationData([]);
+//     }
+//   };
+
+//   const closeConsumptionModal = () => {
+//     setSelectedClient(null);
+//     setModalOpen(false);
+//   };
+
+//   return (
+//     <ProSidebarProvider>
+//       <div className="flex min-h-screen bg-[#E5E5E5]">
+//         <CustomSidebar />
+//         <div className="flex flex-col flex-1 overflow-hidden">
+//           <main className="flex flex-col p-4 sm:p-6 h-full">
+//             <SearchAddBar onAdd={() => setAddClientOpen(true)} onSearch={handleSearch} />
+//             <div className="flex items-center justify-between mt-4">
+//               <SelectionnerClient
+//                 selectedCount={selectedClients.length}
+//                 totalCount={filteredClients.length}
+//                 onSelectAll={() => handleSelectAll(selectedClients.length !== filteredClients.length)}
+//                 onDeleteSelected={handleDeleteSelected}
+//               />
+//               <div className="ml-auto">
+//                 <RenouvelerModele />
+//               </div>
+//             </div>
+
+//             <div className="flex-1 overflow-y-auto mt-4">
+//               {loading ? (
+//                 <div className="text-center py-10">Chargement des clients...</div>
+//               ) : (
+//                 <ClientTable
+//                   clients={filteredClients}
+//                   selectedClients={selectedClients}
+//                   onSelectClient={handleSelectClient}
+//                   onEdit={handleEditClick}
+//                   onDelete={handleDelete}
+//                   onViewConsumption={openConsumptionModal}
+//                   onSelectAll={handleSelectAll}
+//                 />
+//               )}
+//             </div>
+//           </main>
+//         </div>
+
+//         <AddClientModal
+//           isOpen={addClientOpen}
+//           onClose={() => setAddClientOpen(false)}
+//           setClients={setClients}
+//         />
+
+//         <ModifierModal
+//           isOpen={editModalOpen}
+//           onClose={closeEditModal}
+//           clientToEdit={clientToEdit}
+//           setClients={setClients}
+//         />
+
+//         {modalOpen && (
+//           <div className="fixed top-10 left-1/2 transform -translate-x-1/2 bg-white p-6 rounded-xl shadow-lg max-w-6xl w-full z-50 h-[80vh] overflow-y-auto">
+//             <h2 className="text-2xl font-semibold text-[#0F1A3C] mb-6 text-center">
+//               Consommation de {selectedClient?.prenom} {selectedClient?.nom}
+//             </h2>
+//             <div className="w-full h-[60vh]">
+//               <ResponsiveContainer width="100%" height="100%">
+//                 <LineChart data={consommationData}>
+//                   <CartesianGrid stroke="#ccc" />
+//                   <XAxis
+//                     dataKey="date"
+//                     angle={-45}
+//                     textAnchor="end"
+//                     interval={0}
+//                     height={80}
+//                     tick={{ fontSize: 12 }}
+//                   />
+//                   <YAxis />
+//                   <Tooltip />
+//                   <Line
+//                     type="monotone"
+//                     dataKey="valeur"
+//                     stroke="#8884d8"
+//                     name="Réelle"
+//                   />
+//                   <Line
+//                     type="monotone"
+//                     dataKey="prediction"
+//                     stroke="#82ca9d"
+//                     name="Prédite"
+//                   />
+//                 </LineChart>
+//               </ResponsiveContainer>
+//             </div>
+//             <div className="mt-6 flex justify-end">
+//               <button
+//                 onClick={closeConsumptionModal}
+//                 className="px-6 py-2 bg-[#FCB17A] text-white rounded-xl hover:bg-[#e99a5a] transition"
+//               >
+//                 Fermer
+//               </button>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </ProSidebarProvider>
+//   );
+// };
+
+// export default Client;
+import React, { useState, useEffect } from "react";
 import { ProSidebarProvider } from "react-pro-sidebar";
 import CustomSidebar from "../components/CustomSidebar";
 import SearchAddBar from "../components/listClient/SearchAddBar";
-
-import { Dialog } from "@headlessui/react";
+import AddClientModal from "../components/listClient/AddClientModal";
+import ClientTable from "../components/listClient/ClientTable";
+import ModifierModal from "../components/listClient/ModifierModal";
+import SelectionnerClient from "../components/listClient/SelectionnerClient";
+import RenouvelerModele from "../components/listClient/renouvelerModele";
 import {
   LineChart,
   Line,
@@ -15,188 +546,240 @@ import {
 } from "recharts";
 
 const Client = () => {
-  const [clients, setClients] = useState([
-    { id: 1, nom: "Belaid", prenom: "Nora", adresse: "Alger", telephone: "0555 123 456", email: "nora@example.com" },
-    { id: 2, nom: "Belloul", prenom: "Kaci", adresse: "Alger", telephone: "0666 789 012", email: "kaci@example.com" },
-    { id: 3, nom: "Chaffi", prenom: "Aicha Manel", adresse: "Oran", telephone: "0666 789 012", email: "aicha@example.com" },
-    { id: 4, nom: "Ibrir", prenom: "Walid", adresse: "Oran", telephone: "0666 789 012", email: "walid@example.com" },
-  ]);
-
+  const [clients, setClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [addClientOpen, setAddClientOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [clientToEdit, setClientToEdit] = useState(null);
+  const [selectedClients, setSelectedClients] = useState([]);
+  const [consommationData, setConsommationData] = useState([]);
 
-  // Exemple données réelles + prédictions par client
-  const consommationDataByClient = {
-    1: [
-      { date: "2024-01", valeur: 120 },
-      { date: "2024-02", valeur: 130 },
-      { date: "2024-03", valeur: 125 },
-      { date: "2024-04", valeur: 135 },
-      { date: "2024-05", valeur: 140 },
-      { date: "2024-06", valeur: 138 },
-      { date: "2024-07", valeur: 142 },
-      { date: "2024-08", valeur: 145 },
-      { date: "2024-09", prediction: 148 },
-      { date: "2024-10", prediction: 152 },
-      { date: "2024-11", prediction: 158 },
-      { date: "2024-12", prediction: 161 },
-    ],
-    2: [
-      { date: "2024-01", valeur: 110 },
-      { date: "2024-02", valeur: 115 },
-      { date: "2024-03", valeur: 117 },
-      { date: "2024-04", valeur: 120 },
-      { date: "2024-05", valeur: 118 },
-      { date: "2024-06", valeur: 122 },
-      { date: "2024-07", valeur: 125 },
-      { date: "2024-08", valeur: 128 },
-      { date: "2024-09", prediction: 130 },
-      { date: "2024-10", prediction: 133 },
-      { date: "2024-11", prediction: 135 },
-      { date: "2024-12", prediction: 138 },
-    ],
-   3: [ // Aicha Manel
-    { date: "2024-01", valeur: 95 },
-    { date: "2024-02", valeur: 100 },
-    { date: "2024-03", valeur: 105 },
-    { date: "2024-04", valeur: 103 },
-    { date: "2024-05", valeur: 108 },
-    { date: "2024-06", valeur: 110 },
-    { date: "2024-07", valeur: 112 },
-    { date: "2024-08", valeur: 114 },
-    { date: "2024-09", prediction: 117 },
-    { date: "2024-10", prediction: 120 },
-    { date: "2024-11", prediction: 122 },
-    { date: "2024-12", prediction: 125 },
-  ],
-  4: [ // Walid
-    { date: "2024-01", valeur: 150 },
-    { date: "2024-02", valeur: 145 },
-    { date: "2024-03", valeur: 148 },
-    { date: "2024-04", valeur: 152 },
-    { date: "2024-05", valeur: 149 },
-    { date: "2024-06", valeur: 151 },
-    { date: "2024-07", valeur: 155 },
-    { date: "2024-08", valeur: 158 },
-    { date: "2024-09", prediction: 160 },
-    { date: "2024-10", prediction: 162 },
-    { date: "2024-11", prediction: 165 },
-    { date: "2024-12", prediction: 168 },
-  ],
-};
+  const fetchClients = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:8000/clients");
+      if (!res.ok) throw new Error("Erreur lors de la récupération");
+      const data = await res.json();
+      setClients(data);
+      setFilteredClients(data);
+    } catch (err) {
+      alert("Erreur chargement des clients");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const openModal = (client) => {
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const handleSearch = (query) => {
+    if (!query) {
+      setFilteredClients(clients);
+      return;
+    }
+    const q = query.toLowerCase();
+    const filtered = clients.filter(
+      (c) =>
+        c.nom.toLowerCase().includes(q) ||
+        c.prenom.toLowerCase().includes(q) ||
+        c.codeClient.toString().includes(q)
+    );
+    setFilteredClients(filtered);
+  };
+
+  const handleEditClick = (client) => {
+    setClientToEdit(client);
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setClientToEdit(null);
+    setEditModalOpen(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Confirmer suppression ?")) return;
+    try {
+      const res = await fetch(`http://localhost:8000/clients/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Erreur suppression");
+      setClients((prev) => prev.filter((c) => c.id !== id));
+      setFilteredClients((prev) => prev.filter((c) => c.id !== id));
+      setSelectedClients((prev) => prev.filter((sid) => sid !== id));
+    } catch (err) {
+      alert("Erreur suppression");
+      console.error(err);
+    }
+  };
+
+  const handleSelectClient = (id, checked) => {
+    if (checked) {
+      setSelectedClients((prev) => [...prev, id]);
+    } else {
+      setSelectedClients((prev) => prev.filter((sid) => sid !== id));
+    }
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedClients(filteredClients.map((c) => c.id));
+    } else {
+      setSelectedClients([]);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (
+      selectedClients.length === 0 ||
+      !window.confirm("Confirmer la suppression des clients sélectionnés ?")
+    )
+      return;
+
+    try {
+      for (const id of selectedClients) {
+        const res = await fetch(`http://localhost:8000/clients/${id}`, {
+          method: "DELETE",
+        });
+        if (!res.ok) throw new Error(`Erreur suppression client ${id}`);
+      }
+      setClients((prev) => prev.filter((c) => !selectedClients.includes(c.id)));
+      setFilteredClients((prev) =>
+        prev.filter((c) => !selectedClients.includes(c.id))
+      );
+      setSelectedClients([]);
+    } catch (err) {
+      alert("Erreur lors de la suppression des clients sélectionnés");
+      console.error(err);
+    }
+  };
+
+  const openConsumptionModal = async (client) => {
     setSelectedClient(client);
     setModalOpen(true);
+    try {
+      const res = await fetch(`http://localhost:8000/clients/${client.id}/consommations`);
+      if (!res.ok) throw new Error("Erreur récupération consommation");
+      const data = await res.json();
+
+      const formatted = data.map((item) => ({
+        ...item,
+        date: `${String(item.mois).padStart(2, "0")}/${item.annee}`,
+      }));
+
+      setConsommationData(formatted);
+    } catch (err) {
+      alert("Impossible de récupérer les données de consommation.");
+      console.error(err);
+      setConsommationData([]);
+    }
   };
-  const closeModal = () => {
-    setModalOpen(false);
+
+  const closeConsumptionModal = () => {
     setSelectedClient(null);
+    setModalOpen(false);
   };
-
-  const data = selectedClient ? consommationDataByClient[selectedClient.id] || [] : [];
-
-  // Table avec bouton Visualiser
-  const ClientTableWithVisualize = ({ clients, onVisualize }) => (
-    <div className="bg-white p-4 rounded-2xl shadow-md overflow-x-auto">
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="bg-[#8D91AB] text-white">
-            <th className="px-4 py-2">ID</th>
-            <th className="px-4 py-2">Nom</th>
-            <th className="px-4 py-2">Prénom</th>
-            <th className="px-4 py-2">Adresse</th>
-            <th className="px-4 py-2">Téléphone</th>
-            <th className="px-4 py-2">Email</th>
-            <th className="px-4 py-2 text-center">Visualiser</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clients.map((client) => (
-            <tr key={client.id} className="hover:bg-gray-100">
-              <td className="px-4 py-2">{client.id}</td>
-              <td className="px-4 py-2">{client.nom}</td>
-              <td className="px-4 py-2">{client.prenom}</td>
-              <td className="px-4 py-2">{client.adresse}</td>
-              <td className="px-4 py-2">{client.telephone}</td>
-              <td className="px-4 py-2">{client.email}</td>
-              <td className="px-4 py-2 text-center">
-                <button
-                  onClick={() => onVisualize(client)}
-                  className="bg-[#162556] text-white px-3 py-1 rounded-xl hover:bg-[#1d2d66] transition"
-                >
-                  Visualiser
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
 
   return (
     <ProSidebarProvider>
-      <div className="flex bg-[#E5E5E5] min-h-screen">
+      <div className="flex min-h-screen bg-[#E5E5E5]">
         <CustomSidebar />
-        <div className="p-6 w-full">
-          <SearchAddBar onAdd={() => alert("Ajouter un client")} onSearch={(q) => console.log("Recherche :", q)} />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <main className="flex flex-col p-4 sm:p-6 h-full">
+            <SearchAddBar onAdd={() => setAddClientOpen(true)} onSearch={handleSearch} />
+            <div className="flex items-center justify-between mt-4">
+              <SelectionnerClient
+                selectedCount={selectedClients.length}
+                totalCount={filteredClients.length}
+                onSelectAll={() => handleSelectAll(selectedClients.length !== filteredClients.length)}
+                onDeleteSelected={handleDeleteSelected}
+              />
+              <div className="ml-auto">
+                <RenouvelerModele />
+              </div>
+            </div>
 
-          <ClientTableWithVisualize clients={clients} onVisualize={openModal} />
+            <div className="flex-1 overflow-y-auto mt-4">
+              {loading ? (
+                <div className="text-center py-10">Chargement des clients...</div>
+              ) : (
+                <ClientTable
+                  clients={filteredClients}
+                  selectedClients={selectedClients}
+                  onSelectClient={handleSelectClient}
+                  onEdit={handleEditClick}
+                  onDelete={handleDelete}
+                  onViewConsumption={openConsumptionModal}
+                  onSelectAll={handleSelectAll}
+                />
+              )}
+            </div>
+          </main>
         </div>
 
-        {/* Modal graphique */}
-        <Dialog open={modalOpen} onClose={closeModal} className="relative z-50">
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <Dialog.Panel className="bg-white p-6 rounded-xl shadow-lg max-w-xl w-full">
-              <Dialog.Title className="text-xl font-semibold mb-4">
-                Consommations & Prédictions - {selectedClient?.prenom} {selectedClient?.nom}
-              </Dialog.Title>
+        <AddClientModal
+          isOpen={addClientOpen}
+          onClose={() => setAddClientOpen(false)}
+          setClients={setClients}
+        />
 
-              <div style={{ width: "100%", height: 300 }}>
-                <ResponsiveContainer>
-                  <LineChart data={data}>
-                    <CartesianGrid stroke="#878fad" />
-                    <XAxis dataKey="date" stroke="#424769" />
-                    <YAxis stroke="#424769" />
+        <ModifierModal
+          isOpen={editModalOpen}
+          onClose={closeEditModal}
+          clientToEdit={clientToEdit}
+          setClients={setClients}
+        />
+
+        {modalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Overlay flouté */}
+            <div
+  className="absolute inset-0 backdrop-blur-sm bg-transparent z-40"
+  onClick={closeConsumptionModal}
+/>
+
+            {/* Modal */}
+            <div className="relative z-50 bg-white p-6 rounded-xl shadow-xl max-w-6xl w-[95%] h-[80vh] overflow-y-auto">
+              <h2 className="text-2xl font-semibold text-[#0F1A3C] mb-6 text-center">
+                Consommation de {selectedClient?.prenom} {selectedClient?.nom}
+              </h2>
+
+              <div className="w-full h-[60vh]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={consommationData}>
+                    <CartesianGrid stroke="#ccc" />
+                    <XAxis
+                      dataKey="date"
+                      angle={-45}
+                      textAnchor="end"
+                      interval={0}
+                      height={70}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis />
                     <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="valeur"
-                      name="Valeur réelle"
-                      stroke="#424769"
-                      strokeWidth={2}
-                      dot={{ r: 3 }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="prediction"
-                      name="Prédiction"
-                      stroke="#f9b17a"
-                      strokeWidth={2}
-                      dot={{ r: 3, strokeDasharray: "5 5" }}
-                      strokeDasharray="5 5"
-                    />
+                    <Line type="monotone" dataKey="valeur" stroke="#8884d8" name="Réelle" />
+                    <Line type="monotone" dataKey="prediction" stroke="#82ca9d" name="Prédite" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
-              <p className="text-sm text-black italic mt-4 ml-2">
-                🔶 La ligne orange représente les valeurs prédites pour les prochaines périodes.
-              </p>
-
-              <div className="mt-4 flex justify-end">
+              <div className="mt-6 flex justify-end">
                 <button
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-[#FCB17A] text-white rounded-xl"
+                  onClick={closeConsumptionModal}
+                  className="px-6 py-2 bg-[#FCB17A] text-white rounded-xl hover:bg-[#e99a5a] transition"
                 >
                   Fermer
                 </button>
               </div>
-            </Dialog.Panel>
+            </div>
           </div>
-        </Dialog>
+        )}
       </div>
     </ProSidebarProvider>
   );

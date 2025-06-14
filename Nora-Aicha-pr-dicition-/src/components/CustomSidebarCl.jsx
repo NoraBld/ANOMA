@@ -1,20 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
 import { Sidebar as ProSidebar, Menu, MenuItem, useProSidebar } from 'react-pro-sidebar';
 import {
   FaBars,
   FaHome,
   FaUser,
-  FaTachometerAlt,
   FaChartLine,
-  FaRobot,
   FaSignOutAlt
 } from 'react-icons/fa';
-import LogoProfil from '../assets/images/portrait.jpg';
 import '../assets/css/CustomSidebar.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function CustomSidebarCl() {
   const { collapseSidebar } = useProSidebar();
+  const navigate = useNavigate();
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768); 
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
 
@@ -36,6 +36,14 @@ function CustomSidebarCl() {
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     collapseSidebar();
+  };
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?');
+    if (confirmLogout) {
+      localStorage.removeItem('token');
+      navigate('/');
+    }
   };
 
   const menuStyles = {
@@ -70,8 +78,8 @@ function CustomSidebarCl() {
           <div style={{ height: '60px' }}></div>
 
           <MenuItem 
-            component={<Link to="/profile" />} 
-            icon={<img src={LogoProfil} alt="Profil" style={{ width: '25px', height: '25px', borderRadius: '50%' }} />}
+            component={<Link to="/profileCl" />} 
+            icon={<FaUser />}
           >
             Profil
           </MenuItem>
@@ -80,19 +88,17 @@ function CustomSidebarCl() {
             Visualisation
           </MenuItem>
 
-          
-
           <MenuItem icon={<FaChartLine />} component={<Link to="" />}>
             Historique
           </MenuItem>
-
-          
         </Menu>
 
         <div style={{ flexGrow: 1 }}></div>
 
         <Menu menuItemStyles={menuStyles}>
-          <MenuItem icon={<FaSignOutAlt />}>Déconnexion</MenuItem>
+          <MenuItem icon={<FaSignOutAlt />} onClick={handleLogout}>
+            Déconnexion
+          </MenuItem>
         </Menu>
       </div>
     </>
