@@ -1,0 +1,23 @@
+
+
+# 👉 Backend (FastAPI)
+monbackend/venv310/
+monbackend/vemv1/
+
+monbackend/__pycache__/
+*.pyc
+*.pyo
+
+# 👉 Frontend (React)
+
+Nora-Aicha-pr-dicition-/node_modules/
+Nora-Aicha-pr-dicition-/.vite/
+Nora-Aicha-pr-dicition-/dist/
+
+# 👉 Fichiers d'environnement
+.env
+monbackend/.env
+Nora-Aicha-pr-dicition-/.env
+# 👉 Fichiers système
+.DS_Store
+Thumbs.db

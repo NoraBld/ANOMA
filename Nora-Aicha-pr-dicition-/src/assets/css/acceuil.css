@@ -1,0 +1,33 @@
+
+.main-banner {
+    background-image: url("../images/presentation1.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    padding-top: 100px;
+    padding-bottom: 240px;
+    text-align: center;
+  }
+
+.h2em{
+    color: #780004;
+}
+.h2{
+    color: #000000;
+}
+
+.butcon{
+    border-color: #DFC57B;
+    color: #DFC57B;
+}
+
+.butcon:hover {
+    background-color: #DFC57B; /* équivalent de red-800 */
+    color: #272727;
+  }
+  .logo img {
+    
+    height: 70px;  /* Ajuste cette valeur */
+    width: auto;    /* Garde la largeur proportionnelle */
+  }
+  
