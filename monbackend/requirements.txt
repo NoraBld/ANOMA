@@ -1,0 +1,15 @@
+psycopg2-binary  
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-multipart
+pandas
+numpy
+scikit-learn
+joblib
+openpyxl
+matplotlib
+seaborn
+optuna
+statsmodels
