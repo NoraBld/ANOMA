@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 # 👉 Backend (FastAPI)
 monbackend/venv310/
-monbackend/vemv/
+
+
+
+
+
 
 monbackend/__pycache__/
 *.pyc
@@ -18,4 +23,8 @@ monbackend/.env
 Nora-Aicha-pr-dicition-/.env
 # 👉 Fichiers système
 .DS_Store
+<<<<<<< HEAD
 Thumbs.db
+=======
+Thumbs.db
+>>>>>>> 7a413725a1d667bd08b918cde6c7ad1bd15b0fc8

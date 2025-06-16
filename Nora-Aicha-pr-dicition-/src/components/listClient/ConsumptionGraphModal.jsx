@@ -30,8 +30,10 @@ const ConsumptionGraphModal = ({ isOpen, onClose, client }) => {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+
       <div className="fixed inset-0 flex items-center justify-center px-4">
         <Dialog.Panel className="bg-white p-6 rounded-xl shadow-lg max-w-xl w-full sm:max-w-lg md:max-w-xl">
+
           <Dialog.Title className="text-xl font-semibold mb-4">
             Consommations horaires - {client.prenom} {client.nom}
           </Dialog.Title>
@@ -59,7 +61,9 @@ const ConsumptionGraphModal = ({ isOpen, onClose, client }) => {
           <div className="mt-4 flex justify-end">
             <button
               onClick={onClose}
+
               className="px-4 py-2 bg-[#FCB17A] text-white rounded-xl hover:bg-[#e89a52] transition"
+
             >
               Fermer
             </button>

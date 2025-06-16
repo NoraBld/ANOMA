@@ -11,6 +11,7 @@ const AddClientModal = ({ isOpen, onClose, setClients }) => {
     date_naissance: "",
     email: "",
   });
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [consommationFile, setConsommationFile] = useState(null);
@@ -115,7 +116,7 @@ const AddClientModal = ({ isOpen, onClose, setClients }) => {
       setConsommationFile(null);
       setFileError("");
       onClose();
-       window.location.reload();
+      window.location.reload(); // optionnel
     } catch (error) {
       setErrors({ global: "Erreur réseau. Veuillez vérifier votre connexion." });
     } finally {
@@ -177,7 +178,9 @@ const AddClientModal = ({ isOpen, onClose, setClients }) => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-[#0F1A3C]">Fichier de consommation (CSV ou Excel)</label>
+              <label className="text-sm font-medium text-[#0F1A3C]">
+                Fichier de consommation (CSV ou Excel)
+              </label>
               <input
                 type="file"
                 accept=".csv, .xlsx"

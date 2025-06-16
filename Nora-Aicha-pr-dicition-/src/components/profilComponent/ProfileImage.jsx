@@ -38,6 +38,7 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
           onClick={() => document.getElementById('fileInput').click()}
           className="absolute bottom-0 right-0 bg-[#000229] p-2 rounded-full cursor-pointer"
         >
+
           <FaPen size={16} color="#FCB17A" />
         </div>
       </div>
@@ -82,11 +83,13 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
           </div>
         </div>
 
+
         <button
           onClick={handlePasswordToggle}
           className="mt-4 text-white px-4 py-2 rounded hover:brightness-110 w-full md:w-auto"
           style={{ backgroundColor: '#FCB17A' }}
         >
+
           Modifier le mot de passe
         </button>
 
@@ -112,11 +115,13 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
                 className="w-full p-2 rounded text-black"
               />
             </div>
+
             <button
               onClick={handleSubmit}
               className="text-white px-4 py-2 mt-2 rounded hover:brightness-110 w-full md:w-auto"
               style={{ backgroundColor: '#FCB17A' }}
             >
+
               Valider
             </button>
           </div>
@@ -124,6 +129,8 @@ const ProfileImage = ({ onImageChange, profilePic }) => {
       </div>
 
       <FileTable files={files} />
+
+
 
       <style>{`
         .custom-label {

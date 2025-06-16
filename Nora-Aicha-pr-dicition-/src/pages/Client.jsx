@@ -535,6 +535,7 @@ import ClientTable from "../components/listClient/ClientTable";
 import ModifierModal from "../components/listClient/ModifierModal";
 import SelectionnerClient from "../components/listClient/SelectionnerClient";
 import RenouvelerModele from "../components/listClient/renouvelerModele";
+
 import {
   LineChart,
   Line,
@@ -546,6 +547,7 @@ import {
 } from "recharts";
 
 const Client = () => {
+
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -765,21 +767,26 @@ const Client = () => {
                     <Tooltip />
                     <Line type="monotone" dataKey="valeur" stroke="#8884d8" name="Réelle" />
                     <Line type="monotone" dataKey="prediction" stroke="#82ca9d" name="Prédite" />
+
                   </LineChart>
                 </ResponsiveContainer>
               </div>
+
 
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={closeConsumptionModal}
                   className="px-6 py-2 bg-[#FCB17A] text-white rounded-xl hover:bg-[#e99a5a] transition"
+
                 >
                   Fermer
                 </button>
               </div>
+
             </div>
           </div>
         )}
+
       </div>
     </ProSidebarProvider>
   );

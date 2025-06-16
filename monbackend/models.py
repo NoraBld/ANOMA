@@ -5,11 +5,11 @@ from database import Base
 
 
 class Admin(Base):
-    __tablename__= "admin"
+    _tablename_ = "admin"
     id = Column(Integer, primary_key=True, index=True)
     nom_Entreprise = Column(String(25))
     email = Column(String(25), unique=True, index=True)
-    mot_de_passe = Column(String(25))
+    mot_de_passe = Column(String(250))
     secteur = Column(String(25))
     logo = Column(String(50))  # chemin ou URL
     telephone = Column(String(20))
@@ -18,11 +18,8 @@ class Admin(Base):
     predictions = relationship("Prediction", back_populates="admin")
 
 
-
-
-
 class Deeplearning(Base):
-    __tablename__= "deeplearning"
+    _tablename_ = "deeplearning"
     id_deeplearning = Column(Integer, primary_key=True, index=True)
     units = Column(Integer)
     epochs = Column(Integer)
@@ -36,10 +33,12 @@ class Deeplearning(Base):
     mape = Column(Float)
 
     predictions = relationship("Prediction", back_populates="deeplearning")
-    clients = relationship("Client", back_populates="deeplearning")  # ← Ajoute cette ligne
+    clients = relationship("Client", back_populates="deeplearning")
+
+
 
 class Client(Base):
-    __tablename__ = "clients"
+    _tablename_ = "clients"
 
     id = Column(Integer, primary_key=True, index=True)
     codeClient = Column(Integer, nullable=False)
@@ -58,7 +57,7 @@ class Client(Base):
 
 
 class Statistique(Base):
-    __tablename__ = "statistique"
+    _tablename_ = "statistique"
     id_statistique = Column(Integer, primary_key=True, index=True)
     p = Column(Integer)
     q = Column(Integer)
@@ -68,14 +67,14 @@ class Statistique(Base):
     D = Column(Integer)
     saisonalite = Column(Integer)
     AIC = Column(Float)
-    BIC = Column(Float)
+  
     mape = Column(Float)
     nom_methode = Column(String(100))
 
     predictions = relationship("Prediction", back_populates="statistique")
 
 class Prediction(Base):
-    __tablename__ = "prediction"
+    _tablename_ = "prediction"
     id_prediction = Column(Integer, primary_key=True, index=True)
     periode = Column(Integer)
     date_creation = Column(Date)
@@ -90,7 +89,7 @@ class Prediction(Base):
     resultats = relationship("Resultat", back_populates="prediction")
 
 class Resultat(Base):
-    __tablename__= "resultat"
+    _tablename_ = "resultat"
     id_resultat = Column(Integer, primary_key=True, index=True)
     mois = Column(Integer)
     annee = Column(Integer)
@@ -100,7 +99,7 @@ class Resultat(Base):
     prediction = relationship("Prediction", back_populates="resultats")
 
 class Consommation(Base):
-    __tablename__ = "consommation"
+    _tablename_ = "consommation"
     id_consommation = Column(Integer, primary_key=True, index=True)
     mois = Column(Integer)
     annee = Column(Integer)
@@ -108,9 +107,10 @@ class Consommation(Base):
 
     id_client = Column(Integer, ForeignKey("clients.id"), nullable=True)
     client = relationship("Client", back_populates="consommations")
-    
+
+
 class Exogene(Base):
-    __tablename__ = "exogene"
+    _tablename_ = "exogene"
     id_exogene = Column(Integer, primary_key=True, index=True)
     mois = Column(Integer)
     annee = Column(Integer)

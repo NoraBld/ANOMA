@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import '../../assets/css/acceuil.css';
 import imgSrc from '../../assets/images/presentation1.png';
@@ -39,6 +40,7 @@ export default function Presentation() {
             console.error("Erreur lors de la connexion", error);
             alert("Une erreur est survenue.");
         }
+
     };
 
     const renderWelcome = () => (
@@ -61,13 +63,16 @@ export default function Presentation() {
                     Simple. Rapide. Performant.
                 </h1>
 
+
                 {step === "welcome" && (
                     <button
                         onClick={() => setStep("select-role")}
+
                         className="px-6 py-2 border-2 border-[#fcb17a] text-black bg-[#fcb17a] rounded transition font-medium"
                     >
                         Se connecter
                     </button>
+
                 )}
 
                 {step === "select-role" && (
@@ -89,20 +94,24 @@ export default function Presentation() {
                         </button>
                     </div>
                 )}
+
             </div>
         </section>
     );
+
 
     const renderLoginForm = () => (
         <div className="flex h-screen relative">
             <div className="w-full md:w-1/2 flex items-center justify-center bg-[#2d3250] p-8 relative">
                 <button
                     onClick={() => setStep("select-role")}
+
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 bg-[#fcb17a] text-black rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-[#cfae5e] transition"
                     title="Retour"
                 >
                     ❮
                 </button>
+
 
                 <div className="w-full max-w-md">
                     <h2 className="text-xl font-bold mb-6 text-white">
@@ -159,10 +168,14 @@ export default function Presentation() {
                 className="hidden md:block w-1/2 bg-cover bg-center"
                 style={{ backgroundImage: `url(${imgSrc})` }}
                 title="Double-cliquez pour revenir à l'accueil"
+
                 onDoubleClick={() => setStep("welcome")}
+
             ></div>
         </div>
     );
 
+
     return step === "login" ? renderLoginForm() : renderWelcome();
+
 }

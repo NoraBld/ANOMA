@@ -1,4 +1,5 @@
 
+
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 from datetime import date
@@ -25,8 +26,17 @@ class ClientOut(BaseModel):
     date_naissance: date
     email: EmailStr
 
+
     class Config:
         orm_mode = True
+
+
+class UtilisateurUpdate(BaseModel):
+    nom: Optional[str]
+    email: Optional[str]
+    mot_de_passe: Optional[str]
+    secteur: Optional[str]
+    photo_profil: Optional[str]
 
 
 
@@ -92,3 +102,5 @@ class AdminOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+

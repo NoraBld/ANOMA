@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
-const NewPredictionButton = () => {
+
+const NewPredictionButton = ({  onNewPrediction }) => {
+
   const [showForm, setShowForm] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('');
   const [predictionPeriod, setPredictionPeriod] = useState('');
@@ -8,94 +10,198 @@ const NewPredictionButton = () => {
   const [file, setFile] = useState(null);
   const [showModel, setShowModel] = useState(false);
 
+  const [exogFile, setExogFile] = useState(null);
+
+
   const methodInfo = {
     SARIMA: {
-      price: '500 DA',
+      nom : 'SARIMA',
+      maxSize: '2MB',
+      formats: ['CSV', 'Excel'],
+    },
+     SARIMAX: {
+      nom : 'SARIMAX',
+
       maxSize: '2MB',
       formats: ['CSV', 'Excel'],
     },
     GRU: {
-      price: '800 DA',
+
+      nom : 'GRU',
+
       maxSize: '5MB',
       formats: ['CSV', 'Excel'],
     },
   };
 
- 
 
-// const handleValidate = async () => {
-//   const formData = new FormData();
-//   // formData.append("type_modele", selectedMethod);
-//   formData.append("periode", predictionPeriod);
-//   if (file) {
-//     formData.append("fichier", file);
-//     console.log(file)
-//   }
 
-//   try {
-//     console.log("Début")
-//     const response = await fetch("http://localhost:8000/predict", {
-      
-//       method: "POST",
-//       body: formData,
-//     });
-//     console.log("bloc1")
-//     if (!response.ok) {
-//       console.log("bloc1")
-//       throw new Error("Échecccccc de la prédiction");
-//     }
-
-//     const data = await response.json();
-//     console.log("bloc2")
-//     console.log("Réponse du serveur extraction de donnees :", data);
-//     alert("Prédiction lancée avec succès !");
-    
-//     // Tu peux aussi stocker la prédiction reçue ou l'afficher
-//     // setPredictionResult(data);
-
-//     setShowForm(false);
-//     setShowModel(true);
-
-//   } catch (error) {
-//     console.log("bloc3")
-//     console.error("Erreur réseau :", error);
-//     alert("Une erreur est survenue lors de la prédiction.");
-//   }
-// };
 const handleValidate = async () => {
   const formData = new FormData();
-  // formData.append("type_modele", selectedMethod);
+  const formData2= new FormData();
+  const formData3= new FormData();
+  let nb_gru =0;
   formData.append("periode", predictionPeriod);
-  if (file) {
-    formData.append("fichier", file);
-    console.log(file)
+  const methode = methodInfo[selectedMethod].nom;
+  formData.append("nommethode", methode);
+
+  if (methode === "SARIMAX") {
+    // formData.append("fichier", exogFile);
+    formData2.append("periode", predictionPeriod);
+    formData2.append("nommethode", methode);
+    // formData2.append("fichier", file);
+    // formData2.append("fichierexog", exogFile)
+    
+
+
+
+  } else {
+    // formData.append("fichier", file);
   }
-
+ 
   try {
-    const response = await fetch("http://localhost:8000/predict", {
-      method: "POST",
-      body: formData,
-    });
+    let response = null;
 
-    if (!response.ok) {
-      throw new Error("Échecccccc de la prédiction");
+    if (methode === "SARIMA") {
+      response = await fetch("http://localhost:8000/predict/sarima", {
+        method: "POST",
+        body: formData,
+      });
+    } else if (methode === "SARIMAX") {
+      const sarimaResponse = await fetch("http://localhost:8000/predict/sarima", {
+        method: "POST",
+        body: formData,
+      });
+      if (!sarimaResponse.ok) {
+        throw new Error("Erreur lors de la prédiction SARIMA de la requette sarimax");
+      }
+      const sarimaData = await sarimaResponse.json();
+      const { dates, valeurs } = sarimaData;
+      dates.forEach((date) => formData2.append("dates", date));
+      valeurs.forEach((val) => formData2.append("valeurs", val));
+      
+      response = await fetch("http://localhost:8000/predict/sarimax", {
+        method: "POST",
+   
+        body: formData2,
+  });
+ 
+    } else if (methode === "GRU") {
+      response = await fetch("http://localhost:8000/predict/gru", {
+        method: "POST",
+        body: formData,
+      });
+      // nb_gru ++ ;
+    }
+
+    if (!response || !response.ok) {
+      throw new Error("Échec de la prédiction");
+
     }
 
     const data = await response.json();
     console.log("Réponse du serveur :", data);
-    alert("Prédiction lancée avec succès !");
-    
-    // Tu peux aussi stocker la prédiction reçue ou l'afficher
-    // setPredictionResult(data);
 
-    setShowForm(false);
-    setShowModel(true);
+
+    if (data.dates && data.valeurs) {
+      // setPredictionData({
+      //   Date: data.dates,
+      //   Valeurs: data.valeurs
+      // });
+
+if (data.nom_de_la_methode === "SARIMA" || data.nom_de_la_methode === "SARIMAX")
+{
+const predictionFormatted = {
+  Date: data.dates,
+  Valeurs: data.valeurs,
+  methode: data.nom_de_la_methode,
+  periode: predictionPeriod,
+  len: data.data_len
+
+};
+const sommaireFormatted={
+        erreur: data.taux_erreur_mape,
+        p: data.meilleurs_parametres.p,
+        d: data.meilleurs_parametres.d,
+        q: data.meilleurs_parametres.q,
+        P: data.meilleurs_parametres.P,
+        D: data.meilleurs_parametres.D,
+        Q: data.meilleurs_parametres.Q,
+        AIC: data.aic_bestmodel,
+        nommethode: data.nom_de_la_methode
+};
+const selectFormatted={
+  methode: data.nom_de_la_methode,
+  nommethode: data.nom_de_la_methode
+
+};
+onNewPrediction(predictionFormatted, sommaireFormatted, selectFormatted);
+
+}
+if (data.nom_de_la_methode === "GRU")
+{
+// const nomdemethode = `${data.nom_de_la_methode}${nb_gru}`;
+
+const predictionFormatted = {
+  Date: data.dates,
+  Valeurs: data.valeurs,
+  // methode: nomdemethode
+  methode: data.nom_de_la_methode,
+  periode: predictionPeriod,
+  len: data.data_len
+};
+const sommaireFormatted={
+        erreur: data.taux_erreur_mape,
+        learning_rate :data.meilleurs_parametres.learning_rate,
+        units :data.meilleurs_parametres.units,
+        dropout :data.meilleurs_parametres.dropout,
+        epochs :data.meilleurs_parametres.epochs,
+        batch_size :data.meilleurs_parametres.batch_size,
+        time_step :data.meilleurs_parametres.time_step,
+        loss :data.meilleurs_parametres.loss,
+        patience :data.meilleurs_parametres.patience,
+        split_ratio :data.meilleurs_parametres.split_ratio,
+        nommethode: data.nom_de_la_methode
+};
+const selectFormatted={
+  methode: data.nom_de_la_methode,
+  nommethode: data.nom_de_la_methode
+
+};
+onNewPrediction(predictionFormatted, sommaireFormatted, selectFormatted);
+
+}
+
+
+
+
+
+      // setSommaire({
+      //   erreur: data.taux_erreur_mape,
+      //   p: data.meilleurs_parametres.p,
+      //   d: data.meilleurs_parametres.d,
+      //   q: data.meilleurs_parametres.q,
+      //   P: data.meilleurs_parametres.P,
+      //   D: data.meilleurs_parametres.D,
+      //   Q: data.meilleurs_parametres.Q,
+      //   nommethode: data.nom_de_la_methode
+      // });
+
+      alert("Prédiction lancée avec succès !");
+      setShowForm(false);
+      setShowModel(true);
+    } else {
+      alert("Réponse inattendue du serveur.");
+    }
 
   } catch (error) {
     console.error("Erreur réseau :", error);
     alert("Une erreur est survenue lors de la prédiction.");
   }
-}; 
+
+};
+
+
 
 
   return (
@@ -120,7 +226,9 @@ const handleValidate = async () => {
             <h2 className="text-lg font-bold mb-4" style={{ color: '#162556' }}>Choisissez une méthode</h2>
 
             <div className="flex space-x-4 mb-6">
-              {['SARIMA', 'GRU'].map((method) => (
+
+              {['SARIMA', 'SARIMAX', 'GRU'].map((method) => (
+
                 <button
                   key={method}
                   onClick={() => setSelectedMethod(method)}
@@ -137,7 +245,14 @@ const handleValidate = async () => {
 
             {selectedMethod && (
               <div className="space-y-4">
-                <p><strong >Prix :</strong> {methodInfo[selectedMethod].price}</p>
+
+                {/* <p><strong >Prix :</strong> {methodInfo[selectedMethod].price}</p> */}
+                  <input
+                  type="hidden"
+                  name="nom_methode"
+                  value={methodInfo[selectedMethod].nom}
+                  />
+
                 <p><strong>Taille max du dataset :</strong> {methodInfo[selectedMethod].maxSize}</p>
 
                 <div>
@@ -151,7 +266,9 @@ const handleValidate = async () => {
                   />
                 </div>
 
-                <div>
+
+                {/* <div>
+
                   <label className="block mb-1 font-medium" style={{ color: '#162556' }}>Format de données</label>
                   <select
                     value={fileFormat}
@@ -165,9 +282,11 @@ const handleValidate = async () => {
                       </option>
                     ))}
                   </select>
-                </div>
 
-                <div>
+                </div> */}
+
+                {/* <div>
+
                   <label className="block mb-1 font-medium" style={{ color: '#162556' }}>Importer fichier (facultatif)</label>
                   <input  
                     type="file"
@@ -175,7 +294,23 @@ const handleValidate = async () => {
                     onChange={(e) => setFile(e.target.files[0])}
                     className="w-full p-2 border rounded-lg"
                   />
-                </div>
+
+                </div> */}
+                {/* {methodInfo[selectedMethod]?.nom === "SARIMAX" && (
+  <div>
+    <label className="block mb-1 font-medium" style={{ color: '#162556' }}>
+      Importer fichier exogène
+    </label>
+    <input
+      type="file"
+      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      onChange={(e) => setExogFile(e.target.files[0])}
+      className="w-full p-2 border rounded-lg"
+    />
+  </div>
+)} */}
+
+
 
                 <div className="flex justify-end space-x-4 mt-4">
                   <button

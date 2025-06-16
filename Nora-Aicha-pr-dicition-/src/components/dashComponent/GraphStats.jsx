@@ -34,6 +34,7 @@ const GraphStats = () => {
       <div className={cardStyle}>
         <div className="text-sm font-semibold">Consommation moyenne par mois</div>
         <div className="text-lg font-bold">{stats.moyenne_par_mois} W</div>
+
       </div>
     </div>
   );

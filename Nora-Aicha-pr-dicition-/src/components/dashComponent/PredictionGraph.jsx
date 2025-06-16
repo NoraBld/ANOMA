@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp } from 'lucide-react';
+
 import {
   LineChart,
   Line,
@@ -7,6 +8,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+
   CartesianGrid
 } from 'recharts';
 import GraphStats from './GraphStats';
@@ -45,12 +47,14 @@ const PredictionGraph = () => {
   return (
     <div className="bg-[#f3f4fa] text-white p-4 shadow-md w-full">
       <div className="flex flex-col lg:flex-row">
+
         <div className="flex-1">
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={data}>
               <CartesianGrid stroke="#878fad" />
               <XAxis dataKey="date" stroke="#424769" />
               <YAxis stroke="#424769" />
+
 
               <Tooltip
                 content={({ active, payload }) => {
@@ -80,15 +84,18 @@ const PredictionGraph = () => {
           </ResponsiveContainer>
         </div>
 
+
         <div className="mt-6 lg:mt-0 lg:ml-8 w-full lg:w-1/3">
           <GraphStats data={data} />
         </div>
       </div>
 
+
       <p className="text-sm text-black italic mt-4 ml-2 flex items-center gap-2">
         <TrendingUp size={16} className="text-[#FCB17A]" />
         Vous allez produire <strong>{total.toFixed(0)} W</strong> d’énergie.
       </p>
+
     </div>
   );
 };

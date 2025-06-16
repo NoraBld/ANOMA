@@ -11,7 +11,17 @@ import CustomSidebar from '../components/CustomSidebar';
 import { ProSidebarProvider } from 'react-pro-sidebar';
 
 const Prediction = () => {
-  const [selectedData, setSelectedData] = useState(null);
+
+  const [select, setSelect] = useState([]);
+  // const [predictionData, setPredictionData] = useState(null);
+  const [allPredictions, setAllPredictions] = useState([]);
+
+  const [sommaire, setSommaires] = useState([]);
+
+
+
+
+
   return (
     <div className="flex h-screen">
        {/* <GraphProvider> */}
@@ -28,10 +38,27 @@ const Prediction = () => {
         </div> */}
 
       
-<GrapheSection data={selectedData} />
 
-    <MethodSummary/>
-    <NewPredictionButton/>  
+{/* <GrapheSection data={selectedData} />
+ */}
+{/* <GrapheSection predictionData={predictionData}  /> */}
+<GrapheSection allPredictions={allPredictions} parametres={sommaire} select={select} />
+
+
+
+    <MethodSummary sommaire={sommaire}/>
+    {/* <NewPredictionButton setPredictionData={setPredictionData} setSommaire={setSommaire}/>   */}
+    <NewPredictionButton 
+    // setSommaire={setSommaire}
+
+  onNewPrediction={(newPrediction, newSommaire, newmethode ) => {
+    setAllPredictions(prev => [...prev, newPrediction]);
+    setSommaires(prev => [...prev, newSommaire]);
+    setSelect(prev => [...prev, newmethode]);
+  }}
+/>
+
+ 
 
   
 

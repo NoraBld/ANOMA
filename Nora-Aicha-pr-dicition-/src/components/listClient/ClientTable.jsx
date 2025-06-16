@@ -1,6 +1,7 @@
 import React from "react";
 import { Pencil, Trash2, BarChart2 } from "lucide-react";
 
+
 const ClientTable = ({
   clients,
   onEdit,
@@ -43,11 +44,13 @@ const ClientTable = ({
           {clients.length === 0 ? (
             <tr>
               <td colSpan="11" className="text-center py-6 text-gray-500 italic">
+
                 Aucun client trouvé.
               </td>
             </tr>
           ) : (
             clients.map((client) => (
+
               <tr
                 key={client.id}
                 className="hover:bg-gray-100 transition-colors rounded-xl"
@@ -94,6 +97,7 @@ const ClientTable = ({
                     className="text-blue-600 hover:text-blue-800 transition flex items-center justify-center gap-1 underline"
                   >
                     Visualiser <BarChart2 size={20} />
+
                   </button>
                 </td>
               </tr>

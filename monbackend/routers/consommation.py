@@ -5,6 +5,7 @@ from io import StringIO
 from sqlalchemy import extract, func
 from models import Client, Consommation
 from database import get_db
+from auth_utils import get_current_client
 
 router = APIRouter()
 
@@ -151,3 +152,14 @@ def get_consommation_par_annee(db: Session = Depends(get_db)):
     )
 
     return [{"annee": r.annee, "valeur": float(r.total_valeur)} for r in results]
+
+
+
+
+@router.get("/client/mes-consommations")
+def get_mes_consommations(
+    db: Session = Depends(get_db),
+    current_client = Depends(get_current_client)
+):
+    consommations = db.query(Consommation).filter(Consommation.id_client == current_client.id).all()
+    return consommations

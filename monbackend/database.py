@@ -1,4 +1,3 @@
-
 from sqlalchemy import Column, Integer, String, Float, Boolean, Date, ForeignKey, create_engine
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 

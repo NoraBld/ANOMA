@@ -1,8 +1,11 @@
 
+
 import React, { useState, useEffect } from 'react';
+
 import CustomSidebarCl from '../components/CustomSidebarCl';
 import { ProSidebarProvider } from 'react-pro-sidebar';
 import { FaPen } from 'react-icons/fa';
+
 
 const ProfileCl = () => {
   const [userData, setUserData] = useState({
@@ -14,6 +17,7 @@ const ProfileCl = () => {
     telephone: '',
     date_naissance: '',
     adresse: '',
+
     motdepasse: '********',
   });
 
@@ -29,6 +33,7 @@ const ProfileCl = () => {
     new: '',
     confirm: '',
   });
+
 
   useEffect(() => {
     const storedClient = localStorage.getItem('client');
@@ -48,6 +53,7 @@ const ProfileCl = () => {
     }
   }, []);
 
+
   const toggleEdit = (field) => {
     setEditableFields({ ...editableFields, [field]: !editableFields[field] });
   };
@@ -60,6 +66,7 @@ const ProfileCl = () => {
       setUserData({ ...userData, [name]: value });
     }
   };
+
 
   const validateInputs = () => {
     // Email : doit être en minuscules, se terminant par @gmail.com
@@ -144,9 +151,11 @@ const ProfileCl = () => {
 
   return (
     <div className="flex w-full overflow-hidden" style={{ backgroundColor: '#E5E5E5', height: '100vh' }}>
+
       <ProSidebarProvider>
         <CustomSidebarCl />
       </ProSidebarProvider>
+
 
       <div className="flex-1 p-10" style={{ backgroundColor: '#E5E5E5' }}>
         <div className="max-w-4xl mx-auto rounded-xl shadow-md p-6" style={{ backgroundColor: '#FFFFFF', border: '2px solid #1D2D66' }}>
@@ -173,6 +182,7 @@ const ProfileCl = () => {
             ))}
 
             {[{ name: 'email', label: 'Email', type: 'email' }, { name: 'telephone', label: 'Téléphone', type: 'text' }, { name: 'adresse', label: 'Adresse', type: 'text' }].map(({ name, label, type }) => (
+
               <div key={name} className="flex flex-col">
                 <label className="mb-1 text-sm" style={{ color: '#2D3250' }}>{label}</label>
                 <div className="flex items-center space-x-2">
@@ -182,6 +192,7 @@ const ProfileCl = () => {
                       name={name}
                       value={userData[name]}
                       onChange={handleChange}
+
                       autoFocus
                       className="flex-1 p-2 rounded outline-none text-sm placeholder-[#162556]"
                       style={{ backgroundColor: '#E8F0FE', color: '#162556', border: '1.5px solid #E5E5E5' }}
@@ -192,11 +203,13 @@ const ProfileCl = () => {
                         {userData[name]}
                       </span>
                       <FaPen className="cursor-pointer" color="#FCB17A" onClick={() => toggleEdit(name)} />
+
                     </>
                   )}
                 </div>
               </div>
             ))}
+
 
             <div className="flex flex-col">
               <label className="mb-1 text-sm" style={{ color: '#2D3250' }}>Date de naissance</label>
@@ -206,6 +219,7 @@ const ProfileCl = () => {
             </div>
 
             
+
             <div className="md:col-span-2 flex justify-end">
               <button
                 type="submit"

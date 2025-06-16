@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Sidebar as ProSidebar, Menu, MenuItem, useProSidebar } from 'react-pro-sidebar';
 import {
   FaBars,
   FaHome,
   FaUser,
+
   FaChartLine,
   FaSignOutAlt
 } from 'react-icons/fa';
@@ -14,6 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 function CustomSidebarCl() {
   const { collapseSidebar } = useProSidebar();
   const navigate = useNavigate();
+
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768); 
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
@@ -45,6 +46,7 @@ function CustomSidebarCl() {
       navigate('/');
     }
   };
+
 
   const menuStyles = {
     button: {
@@ -78,8 +80,10 @@ function CustomSidebarCl() {
           <div style={{ height: '60px' }}></div>
 
           <MenuItem 
+
             component={<Link to="/profileCl" />} 
             icon={<FaUser />}
+
           >
             Profil
           </MenuItem>
@@ -88,17 +92,21 @@ function CustomSidebarCl() {
             Visualisation
           </MenuItem>
 
+
           <MenuItem icon={<FaChartLine />} component={<Link to="" />}>
             Historique
           </MenuItem>
+
         </Menu>
 
         <div style={{ flexGrow: 1 }}></div>
 
         <Menu menuItemStyles={menuStyles}>
+
           <MenuItem icon={<FaSignOutAlt />} onClick={handleLogout}>
             Déconnexion
           </MenuItem>
+
         </Menu>
       </div>
     </>
