@@ -27,8 +27,12 @@ class ClientOut(BaseModel):
     email: EmailStr
 
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
+
+
+    
 
 
 class UtilisateurUpdate(BaseModel):
@@ -52,8 +56,11 @@ class ClientUpdate(BaseModel):
     date_naissance: date
     email: EmailStr
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
+
+    
 
 
 
@@ -100,7 +107,8 @@ class AdminOut(BaseModel):
     telephone: str
     logo: Optional[str]
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 

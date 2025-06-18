@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 import pandas as pd
 from io import StringIO
 from sqlalchemy import extract, func
-from models import Client, Consommation
+from models import Client, Consommation, Resultat, Prediction
 from database import get_db
 from auth_utils import get_current_client
 
@@ -163,3 +163,93 @@ def get_mes_consommations(
 ):
     consommations = db.query(Consommation).filter(Consommation.id_client == current_client.id).all()
     return consommations
+
+
+
+
+
+
+
+
+@router.get("/prediction/mensuelle")
+def get_predictions_mensuelles(db: Session = Depends(get_db)):
+    # Récupérer la dernière prédiction (selon la date ou l'ID)
+    last_prediction = (
+        db.query(Prediction)
+        .order_by(Prediction.date_creation.desc())
+        .first()
+    )
+
+    if not last_prediction:
+        return []
+
+    resultats = (
+        db.query(Resultat)
+        .filter(Resultat.id_prediction == last_prediction.id_prediction)
+        .order_by(Resultat.annee, Resultat.mois)
+        .all()
+    )
+
+    return [
+        {
+            "date": f"{r.annee}-{r.mois:02d}",
+            "valeur": float(r.valeur)
+        }
+        for r in resultats
+    ]
+
+
+
+
+@router.get("/prediction/count")
+def count_all_predictions(db: Session = Depends(get_db)):
+    total = db.query(Prediction).count()
+    return {"total_predictions": total}
+
+
+
+@router.get("/prediction/last-date")
+def get_last_prediction_date(db: Session = Depends(get_db)):
+    last_prediction = (
+        db.query(Prediction)
+        .order_by(Prediction.date_creation.desc())
+        .first()
+    )
+
+    if not last_prediction:
+        return {"last_date": None}
+
+    return {"last_date": last_prediction.date_creation.strftime("%Y-%m-%d")}
+
+
+
+
+@router.get("/prediction/last-duree")
+def get_last_prediction_duration(db: Session = Depends(get_db)):
+    last_prediction = (
+        db.query(Prediction)
+        .order_by(Prediction.created_at.desc())  # ou selon ta colonne de date
+        .first()
+    )
+    if not last_prediction:
+        return {"start": None, "end": None}
+
+    return {
+        "start": last_prediction.date_debut.strftime("%Y-%m-%d"),
+        "end": last_prediction.date_fin.strftime("%Y-%m-%d")
+    }
+
+
+@router.get("/prediction/resultats")
+def get_predictions_et_resultats(db: Session = Depends(get_db)):
+    predictions = db.query(Prediction).all()
+    
+    result = []
+    for prediction in predictions:
+        for res in prediction.resultats:
+            result.append({
+                "date_creation": prediction.date_creation.isoformat(),
+                "valeur": res.valeur
+            })
+    
+    return result

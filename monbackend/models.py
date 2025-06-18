@@ -5,7 +5,7 @@ from database import Base
 
 
 class Admin(Base):
-    _tablename_ = "admin"
+    __tablename__ = "admin"
     id = Column(Integer, primary_key=True, index=True)
     nom_Entreprise = Column(String(25))
     email = Column(String(25), unique=True, index=True)
@@ -19,7 +19,7 @@ class Admin(Base):
 
 
 class Deeplearning(Base):
-    _tablename_ = "deeplearning"
+    __tablename__ = "deeplearning"
     id_deeplearning = Column(Integer, primary_key=True, index=True)
     units = Column(Integer)
     epochs = Column(Integer)
@@ -38,7 +38,7 @@ class Deeplearning(Base):
 
 
 class Client(Base):
-    _tablename_ = "clients"
+    __tablename__ = "clients"
 
     id = Column(Integer, primary_key=True, index=True)
     codeClient = Column(Integer, nullable=False)
@@ -57,7 +57,7 @@ class Client(Base):
 
 
 class Statistique(Base):
-    _tablename_ = "statistique"
+    __tablename__ = "statistique"
     id_statistique = Column(Integer, primary_key=True, index=True)
     p = Column(Integer)
     q = Column(Integer)
@@ -74,7 +74,7 @@ class Statistique(Base):
     predictions = relationship("Prediction", back_populates="statistique")
 
 class Prediction(Base):
-    _tablename_ = "prediction"
+    __tablename__ = "prediction"
     id_prediction = Column(Integer, primary_key=True, index=True)
     periode = Column(Integer)
     date_creation = Column(Date)
@@ -89,7 +89,7 @@ class Prediction(Base):
     resultats = relationship("Resultat", back_populates="prediction")
 
 class Resultat(Base):
-    _tablename_ = "resultat"
+    __tablename__ = "resultat"
     id_resultat = Column(Integer, primary_key=True, index=True)
     mois = Column(Integer)
     annee = Column(Integer)
@@ -99,7 +99,7 @@ class Resultat(Base):
     prediction = relationship("Prediction", back_populates="resultats")
 
 class Consommation(Base):
-    _tablename_ = "consommation"
+    __tablename__ = "consommation"
     id_consommation = Column(Integer, primary_key=True, index=True)
     mois = Column(Integer)
     annee = Column(Integer)
@@ -110,7 +110,7 @@ class Consommation(Base):
 
 
 class Exogene(Base):
-    _tablename_ = "exogene"
+    __tablename__ = "exogene"
     id_exogene = Column(Integer, primary_key=True, index=True)
     mois = Column(Integer)
     annee = Column(Integer)

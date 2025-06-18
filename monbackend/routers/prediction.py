@@ -29,7 +29,7 @@ from sqlalchemy.orm import Session
 from models import Consommation, Exogene
 from fastapi import Depends
 from database import get_db  
-import pmdarima as pm
+
 
 
 
@@ -252,7 +252,7 @@ async def predict_sarimax(
         exog = exog_final
 
         # 4) Split train/test (80/20)
-        train_size = int(len(serie) * 0.😎
+        train_size = int(len(serie) * 0.8)
         train, test = serie[:train_size], serie[train_size:]
         exog_train, exog_test = exog.iloc[:train_size], exog.iloc[train_size:]
 

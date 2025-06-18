@@ -14,7 +14,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Download } from "lucide-react";
 
-export default function GrapheSection({ allPredictions = [], select = [] }) {
+export default function GrapheSection({ allPredictions = [],parametres, select = [] }) {
   const chartRef = useRef();
   const [displayMode, setDisplayMode] = useState("graph");
   const [selectedMethod, setSelectedMethod] = useState("");
