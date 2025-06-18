@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from database import get_db
 from schemas import AdminOut
-from models import Admin
+from models import Admin, Prediction
 from auth_utils import get_current_admin
 from utils import verify_password, hash_password
 import shutil
@@ -73,3 +73,12 @@ async def update_admin(
     except Exception as e:
         print(f"Erreur lors de la mise à jour du profil : {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/prediction-dates")
+def get_prediction_dates(
+    db: Session = Depends(get_db),
+    current_admin: Admin = Depends(get_current_admin)
+):
+    dates = db.query(Prediction.date_creation).filter(Prediction.id_admin == current_admin.id).distinct().all()
+    return [d[0] for d in dates]

@@ -3,6 +3,8 @@
   import CustomSidebar from '../components/CustomSidebar';
   import { ProSidebarProvider } from 'react-pro-sidebar';
   import { FaPen } from 'react-icons/fa';
+  
+  import PredictionCalendar  from "../components/profilComponent/PredictionCalendar";
 
   const Profile = () => {
     const [adminData, setAdminData] = useState({
@@ -305,6 +307,8 @@
                   Enregistrer
                 </button>
               </div>
+              <PredictionCalendar />
+
             </form>
           </div>
         </div>
