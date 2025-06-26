@@ -11,7 +11,7 @@ import {
 
   CartesianGrid
 } from 'recharts';
-import GraphStats from './GraphStats';
+
 
 const PredictionGraph = () => {
   const [data, setData] = useState([]);
@@ -62,8 +62,8 @@ const PredictionGraph = () => {
                     const point = payload[0].payload;
                     return (
                       <div className="bg-white text-[#2D3250] p-2 rounded shadow border border-gray-200 text-sm">
-                        📅 <strong>Date :</strong> {formatDate(point.date)} <br />
-                        ⚡ <strong>Consommation :</strong> {point.valeur} W
+                        <strong>Date :</strong> {formatDate(point.date)} <br />
+                         <strong>Consommation :</strong> {point.valeur} W
                       </div>
                     );
                   }
@@ -85,9 +85,7 @@ const PredictionGraph = () => {
         </div>
 
 
-        <div className="mt-6 lg:mt-0 lg:ml-8 w-full lg:w-1/3">
-          <GraphStats data={data} />
-        </div>
+        
       </div>
 
 

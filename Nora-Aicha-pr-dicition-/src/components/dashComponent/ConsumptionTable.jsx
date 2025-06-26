@@ -24,7 +24,6 @@ const ConsumptionTable = () => {
     ? data.filter(item => item.date.startsWith(searchMonth))
     : data;
 
-  // 🔽 Tri par code client croissant
   const sortedData = [...filteredData].sort((a, b) => a.code_client - b.code_client);
 
   return (
@@ -40,9 +39,9 @@ const ConsumptionTable = () => {
         className="mb-4 px-3 py-2 border rounded-md shadow-sm w-full text-sm text-[#2d3250]"
       />
 
-      <div className="h-65 overflow-y-auto">
+      <div className="h-64 overflow-y-auto">
         <table className="min-w-full border text-sm text-left text-[#000000]">
-          <thead className="bg-[#303658] text-white">
+          <thead className="bg-[#303658] text-white sticky top-0 z-10">
             <tr>
               <th className="px-4 py-2">Code client</th>
               <th className="px-4 py-2">Date</th>

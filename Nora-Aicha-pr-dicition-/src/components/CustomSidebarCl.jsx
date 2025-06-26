@@ -93,9 +93,7 @@ function CustomSidebarCl() {
           </MenuItem>
 
 
-          <MenuItem icon={<FaChartLine />} component={<Link to="" />}>
-            Historique
-          </MenuItem>
+          
 
         </Menu>
 

@@ -24,7 +24,6 @@ from tensorflow.keras.callbacks import EarlyStopping
 import optuna
 from sklearn.preprocessing import StandardScaler
 
-
 from sqlalchemy.orm import Session
 from models import Consommation, Exogene
 from fastapi import Depends
@@ -55,25 +54,26 @@ async def lancer_prediction(
 ):
     try:
         donnees_admin = []
+
         if nommethode == "SARIMAX":
-            for annee in range(2016, 2020):
-                for mois in range(1, 13):
-                    result = db.query(Exogene).filter(
-                        Exogene.annee == annee,
-                        Exogene.mois == mois
-                    ).first()
-                    valeur = result.valeur if result and result.valeur is not None else 0
-                    donnees_admin.append([f"{mois:02d}/{annee}", valeur])
+            resultats = db.query(Exogene).order_by(Exogene.annee, Exogene.mois).all()
+            for res in resultats:
+                date_formatee = f"{res.mois:02d}/{res.annee}"
+                valeur = res.valeur if res.valeur is not None else 0
+                donnees_admin.append([date_formatee, valeur])
 
         elif nommethode == "SARIMA":
-            for annee in range(2016, 2020):
-                for mois in range(1, 13):
-                    result = db.query(Consommation).filter(
-                        Consommation.annee == annee,
-                        Consommation.mois == mois
-                    ).all()
-                    somme = sum([r.valeur if r.valeur is not None else 0 for r in result])
-                    donnees_admin.append([f"{mois:02d}/{annee}", somme])
+            resultats = db.query(Consommation).order_by(Consommation.annee, Consommation.mois).all()
+            donnees_groupées = {}
+            for res in resultats:
+                cle = (res.annee, res.mois)
+                valeur = res.valeur if res.valeur is not None else 0
+                if cle in donnees_groupées:
+                    donnees_groupées[cle] += valeur
+                else:
+                    donnees_groupées[cle] = valeur
+            for (annee, mois), somme in sorted(donnees_groupées.items()):
+                donnees_admin.append([f"{mois:02d}/{annee}", somme])
         else:
             return JSONResponse(status_code=400, content={"message": "Méthode inconnue."})
 
@@ -162,7 +162,7 @@ async def lancer_prediction(
                 "Q": best_seasonal_order[2], "saison": best_seasonal_order[3]
             },
             "taux_erreur_mape": round(best_model["mape"] * 100, 2),
-            "aic_bestmodel":round(best_model["aic"], 2),
+            "aic_bestmodel": round(best_model["aic"], 2),
             "top_10_modeles": [
                 {
                     "order": m["order"],
@@ -173,8 +173,7 @@ async def lancer_prediction(
                 } for m in top_models
             ],
             "dates": forecast_index.strftime("%Y-%m").tolist(),
-            "data_len":longueur_dataset,
-            
+            "data_len": longueur_dataset,
             "valeurs": forecast.tolist(),
             "donnee_admin": donnees_admin
         })
@@ -183,7 +182,6 @@ async def lancer_prediction(
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"message": f"Erreur : {str(e)}"})
-
 
 
 
@@ -198,15 +196,21 @@ async def predict_sarimax(
     try:
         # 1) Récupération données principales historiques (Consommation)
         donnees_admin = []
-        for annee in range(2016, 2020):
-            for mois in range(1, 13):
-                result = (
-                    db.query(Consommation)
-                    .filter(Consommation.annee == annee, Consommation.mois == mois)
-                    .all()
-                )
-                somme_valeurs = sum([conso.valeur if conso.valeur is not None else 0 for conso in result])
-                donnees_admin.append([f"{annee}-{mois:02d}", somme_valeurs])  # format ISO "YYYY-MM"
+        resultats = db.query(Consommation).order_by(Consommation.annee, Consommation.mois).all()
+
+
+        donnees_groupées = {}
+        for conso in resultats:
+            cle = (conso.annee, conso.mois)
+            valeur = conso.valeur if conso.valeur is not None else 0
+            if cle in donnees_groupées:
+                donnees_groupées[cle] += valeur
+            else:
+                donnees_groupées[cle] = valeur
+        for (annee, mois), somme_valeurs in sorted(donnees_groupées.items()):
+            donnees_admin.append([f"{annee}-{mois:02d}", somme_valeurs])
+
+        
 
         df_main = pd.DataFrame(donnees_admin, columns=["datetime", "value"])
         longueur_dataset = len(donnees_admin)
@@ -216,16 +220,24 @@ async def predict_sarimax(
 
         # 2) Récupération données exogènes historiques (températures)
         donnees_exog = []
-        for annee in range(2016, 2020):
-            for mois in range(1, 13):
-                result = (
-                    db.query(Exogene)
-                    .filter(Exogene.annee == annee, Exogene.mois == mois)
-                    .first()
-                )
-                valeur = result.valeur if result and result.valeur is not None else 0
-                donnees_exog.append([f"{annee}-{mois:02d}", valeur])
 
+# Récupère toutes les lignes de la table Exogene, triées par année et mois
+        resultats = db.query(Exogene).order_by(Exogene.annee, Exogene.mois).all()
+
+# Dictionnaire pour éviter les doublons (on garde une seule valeur par mois/année)
+        exog_unique = {}
+
+        for res in resultats:
+            cle = (res.annee, res.mois)
+            if cle not in exog_unique: 
+                valeur = res.valeur if res.valeur is not None else 0
+                exog_unique[cle] = valeur
+
+
+        for (annee, mois), valeur in sorted(exog_unique.items()):
+            donnees_exog.append([f"{annee}-{mois:02d}", valeur])
+
+       
         df_exog = pd.DataFrame(donnees_exog, columns=["datetime", "exog"])
         df_exog["datetime"] = pd.to_datetime(df_exog["datetime"], format="%Y-%m")
         df_exog = df_exog.sort_values("datetime").reset_index(drop=True)
@@ -358,179 +370,180 @@ async def predict_sarimax(
 
 
 
-
-
-
-
-# Fonctions utilitaires
-def create_sequences(features, targets, time_step):
-    X, Y = [], []
-    for i in range(len(features) - time_step):
-        X.append(features[i:i + time_step])
-        Y.append(targets[i + time_step])
-    return np.array(X), np.array(Y)
-
-def build_gru_model(input_shape, units, dropout, learning_rate, loss):
-    model = Sequential()
-    model.add(GRU(units, return_sequences=True, input_shape=input_shape))
-    model.add(GRU(units))
-    model.add(Dropout(dropout))
-    model.add(Dense(1))
-    model.compile(optimizer=Adam(learning_rate=learning_rate), loss=loss)
-    return model
-
-def evaluate_model(model, X_test, Y_test, scaler):
-    predictions = model.predict(X_test, verbose=0)
-    Y_test_inv = scaler.inverse_transform(Y_test.reshape(-1, 1))
-    predictions_inv = scaler.inverse_transform(predictions)
-
-    rmse = np.sqrt(mean_squared_error(Y_test_inv, predictions_inv))
-    mae = mean_absolute_error(Y_test_inv, predictions_inv)
-    mape = np.mean(np.abs((Y_test_inv - predictions_inv) / Y_test_inv))
-    denominator = (np.abs(Y_test_inv) + np.abs(predictions_inv)) / 2.0
-    smape = np.mean(np.abs(Y_test_inv - predictions_inv) / denominator)
-
-    return rmse, mae, mape, smape, Y_test_inv.flatten(), predictions_inv.flatten()
-def objective(trial, features, targets, scaler):
-    time_step = trial.suggest_int("time_step", 6, 24)
-    split_ratio = trial.suggest_float("split_ratio", 0.6, 0.9)
-    units = trial.suggest_categorical("units", [32, 64, 128])
-    dropout = trial.suggest_float("dropout", 0.1, 0.5)
-    learning_rate = trial.suggest_loguniform("learning_rate", 1e-4, 1e-2)
-    batch_size = trial.suggest_categorical("batch_size", [8, 16, 32])
-    epochs = trial.suggest_int("epochs", 20, 100)
-    loss = trial.suggest_categorical("loss", ["mse", "mae"])
-    patience = trial.suggest_int("patience", 5, 15)
-
-    X, Y = create_sequences(features, targets, time_step)
-    split = int(len(X) * split_ratio)
-    X_train, Y_train = X[:split], Y[:split]
-    X_val, Y_val = X[split:], Y[split:]
-
-    model = build_gru_model(
-        input_shape=(time_step, features.shape[1]),
-        units=units,
-        dropout=dropout,
-        learning_rate=learning_rate,
-        loss=loss
-    )
-
-    early_stopping = EarlyStopping(monitor="val_loss", patience=patience, restore_best_weights=True)
-
-    model.fit(X_train, Y_train,
-              validation_data=(X_val, Y_val),
-              epochs=epochs,
-              batch_size=batch_size,
-              callbacks=[early_stopping],
-              verbose=0)
-
-    _, _, mape, _, _, _ = evaluate_model(model, X_val, Y_val, scaler)
-    return mape
 @router.post("/predict/gru")
 async def predict_gru(periode: int = Form(...), nommethode: str = Form(...), db: Session = Depends(get_db)):
     try:
+        # === Chargement données ===
         donnees_admin = []
-        for annee in range(2016, 2020):
-            for mois in range(1, 13):
-                result = db.query(Consommation).filter(Consommation.annee == annee, Consommation.mois == mois).all()
-                somme_valeurs = sum([conso.valeur or 0 for conso in result])
-                donnees_admin.append([f"{mois:02d}/{annee}", somme_valeurs])
+        resultats = db.query(Consommation).order_by(Consommation.annee, Consommation.mois).all()
 
-        df = pd.DataFrame(donnees_admin, columns=["datetime", "value"])
-        longueur_dataset = len(donnees_admin)
 
-        df["datetime"] = pd.to_datetime(df["datetime"], format="%m/%Y")
-        df = df.sort_values("datetime")
-        df["month"] = df["datetime"].dt.month
-        df["year"] = df["datetime"].dt.year
+        donnees_groupées = {}
+        for conso in resultats:
+            cle = (conso.annee, conso.mois)
+            valeur = conso.valeur if conso.valeur is not None else 0
+            if cle in donnees_groupées:
+                donnees_groupées[cle] += valeur
+            else:
+                donnees_groupées[cle] = valeur
+        for (annee, mois), somme_valeurs in sorted(donnees_groupées.items()):
+            donnees_admin.append([f"{annee}-{mois:02d}", somme_valeurs])
+
+
+        df = pd.DataFrame(donnees_admin, columns=["date", "valeur"])
+
+# Convertir la colonne "date" (ex: "01/2016") en datetime
+        df["date"] = pd.to_datetime(df["date"], format="%Y-%m")
+
+
+# Extraire mois et année si besoin
+        df["month"] = df["date"].dt.month
+        df["year"] = df["date"].dt.year
+
+        df["quarter"] = df["date"].dt.quarter
         df["month_sin"] = np.sin(2 * np.pi * df["month"] / 12)
         df["month_cos"] = np.cos(2 * np.pi * df["month"] / 12)
-        df["year_norm"] = (df["year"] - df["year"].min()) / (df["year"].max() - df["year"].min())
-        df["season"] = df["month"] % 12 // 3 + 1
-        df["season_sin"] = np.sin(2 * np.pi * df["season"] / 4)
-        df["season_cos"] = np.cos(2 * np.pi * df["season"] / 4)
+        df["quarter_sin"] = np.sin(2 * np.pi * df["quarter"] / 4)
+        df["quarter_cos"] = np.cos(2 * np.pi * df["quarter"] / 4)
+        df["is_winter"] = df["month"].isin([12, 1, 2]).astype(int)
+        df["is_summer"] = df["month"].isin([6, 7, 8]).astype(int)
+        df["moving_avg"] = df["valeur"].rolling(window=3).mean().fillna(method="bfill")
+        df["lag_1"] = df["valeur"].shift(1).fillna(method="bfill")
+        df["lag_3"] = df["valeur"].shift(3).fillna(method="bfill")
 
-        scaler = MinMaxScaler()
-        df["scaled_value"] = scaler.fit_transform(df[["value"]])
-        features = df[["scaled_value", "month_sin", "month_cos", "year_norm", "season_sin", "season_cos"]].values
+        scaler_val = MinMaxScaler()
+        df["valeur_scaled"] = scaler_val.fit_transform(df[["valeur"]])
+        df["year_scaled"] = MinMaxScaler().fit_transform(df[["year"]])
+        df["moving_avg_scaled"] = MinMaxScaler().fit_transform(df[["moving_avg"]])
+        df["lag_1_scaled"] = MinMaxScaler().fit_transform(df[["lag_1"]])
+        df["lag_3_scaled"] = MinMaxScaler().fit_transform(df[["lag_3"]])
+
+        features_cols = [
+            "valeur_scaled", "month_sin", "month_cos", "quarter_sin", "quarter_cos",
+            "is_winter", "is_summer", "year_scaled", "moving_avg_scaled",
+            "lag_1_scaled", "lag_3_scaled"
+        ]
+        features = df[features_cols].values
+        target = df["valeur_scaled"].values
+
+        def create_sequences(features, targets, look_back):
+            X, y = [], []
+            for i in range(len(features) - look_back):
+                X.append(features[i:i + look_back])
+                y.append(targets[i + look_back])
+            return np.array(X), np.array(y)
+
+        def mape(y_true, y_pred): return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+        def smape(y_true, y_pred): return 100 * np.mean(2 * np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
+        def mae(y_true, y_pred): return np.mean(np.abs(y_true - y_pred))
+        def rmse(y_true, y_pred): return np.sqrt(np.mean((y_true - y_pred) ** 2))
+
+        look_back = 10
+        X_train, y_train = create_sequences(features, target, look_back)
+
+        import optuna
+        from tensorflow.keras.models import Sequential
+        from tensorflow.keras.layers import Input, GRU, Dense, Dropout
+        from tensorflow.keras.optimizers import Adam
+
+        def objective(trial):
+            model = Sequential([
+                Input(shape=(look_back, len(features_cols))),
+                GRU(trial.suggest_int("units1", 32, 128), return_sequences=True),
+                GRU(trial.suggest_int("units2", 32, 128), return_sequences=True),
+                GRU(trial.suggest_int("units3", 32, 128)),
+                Dropout(trial.suggest_float("dropout", 0.1, 0.5)),
+                Dense(1)
+            ])
+            model.compile(optimizer=Adam(), loss="mean_squared_error")
+            model.fit(
+                X_train, y_train,
+                epochs=trial.suggest_int("epochs", 50, 150),
+                batch_size=trial.suggest_categorical("batch_size", [8, 16, 32]),
+                verbose=0
+            ) 
+            y_pred = model.predict(X_train)
+            y_pred_inv = scaler_val.inverse_transform(y_pred)
+            y_true_inv = scaler_val.inverse_transform(y_train.reshape(-1, 1))
+            return mape(y_true_inv, y_pred_inv)
 
         study = optuna.create_study(direction="minimize")
-        func = lambda essai: objective(essai, features, df["scaled_value"].values, scaler)
-        study.optimize(func, n_trials=5)
-        best_params = study.best_trial.params
+        study.optimize(objective, n_trials=10)
+        best_params = study.best_params
 
-        X, Y = create_sequences(features, df["scaled_value"].values, best_params["time_step"])
-        split = int(len(X) * best_params["split_ratio"])
-        X_train, Y_train = X[:split], Y[:split]
-        X_test, Y_test = X[split:], Y[split:]
+        model = Sequential([
+            Input(shape=(look_back, len(features_cols))),
+            GRU(best_params["units1"], return_sequences=True),
+            GRU(best_params["units2"], return_sequences=True),
+            GRU(best_params["units3"]),
+            Dropout(best_params["dropout"]),
+            Dense(1)
+        ])
+        model.compile(optimizer=Adam(), loss="mean_squared_error")
+        model.fit(X_train, y_train, epochs=best_params["epochs"], batch_size=best_params["batch_size"], verbose=0)
 
-        input_shape = (X_train.shape[1], X_train.shape[2])
-        model = build_gru_model(
-            input_shape=input_shape,
-            units=best_params["units"],
-            dropout=best_params["dropout"],
-            learning_rate=best_params["learning_rate"],
-            loss=best_params["loss"]
-        )
-        early_stopping = EarlyStopping(monitor="val_loss", patience=best_params["patience"], restore_best_weights=True)
-        model.fit(X_train, Y_train,
-                  validation_data=(X_test, Y_test),
-                  epochs=best_params["epochs"],
-                  batch_size=best_params["batch_size"],
-                  callbacks=[early_stopping],
-                  verbose=0)
+        y_pred = model.predict(X_train)
+        y_pred_inv = scaler_val.inverse_transform(y_pred)
+        y_true_inv = scaler_val.inverse_transform(y_train.reshape(-1, 1))
 
-        rmse, mae, mape, smape, _, _ = evaluate_model(model, X_test, Y_test, scaler)
+        last_seq = features[-look_back:]
+        future_preds = []
+        future_dates = pd.date_range(df["date"].iloc[-1] + pd.DateOffset(months=1), periods=periode, freq='MS')
+        for date in future_dates:
+            month = date.month
+            quarter = ((month - 1) // 3) + 1
+            sin_m, cos_m = np.sin(2 * np.pi * month / 12), np.cos(2 * np.pi * month / 12)
+            sin_q, cos_q = np.sin(2 * np.pi * quarter / 4), np.cos(2 * np.pi * quarter / 4)
+            is_winter = int(month in [12, 1, 2])
+            is_summer = int(month in [6, 7, 8])
+            year_scaled = df["year_scaled"].iloc[-1]
+            last_val = future_preds[-1] if future_preds else y_pred[-1][0]
+            lag_1, lag_3 = last_val, future_preds[-3] if len(future_preds) >= 3 else last_val
+            moving_avg = np.mean(future_preds[-3:]) if len(future_preds) >= 3 else last_val
 
-        # Génération des prédictions futures
-        future_predictions = []
-        last_sequence = features[-best_params["time_step"]:]
-        last_date = df["datetime"].iloc[-1]
+            input_vector = [
+                last_val, sin_m, cos_m, sin_q, cos_q,
+                is_winter, is_summer, year_scaled,
+                df["moving_avg_scaled"].mean(), df["lag_1_scaled"].mean(), df["lag_3_scaled"].mean()
+            ]
+            input_seq = np.vstack([last_seq[1:], input_vector])
+            input_seq = input_seq.reshape(1, look_back, len(features_cols))
 
-        for _ in range(periode):
-            input_seq = last_sequence.reshape(1, *input_shape)
-            next_scaled = model.predict(input_seq, verbose=0)[0][0]
-            future_predictions.append(next_scaled)
+            pred = model.predict(input_seq)[0, 0]
+            future_preds.append(pred)
+            last_seq = input_seq[0]
 
-            next_date = last_date + pd.DateOffset(months=1)
-            next_month = next_date.month
-            next_year = next_date.year
-            next_year_norm = (next_year - df["year"].min()) / (df["year"].max() - df["year"].min())
-            next_season = next_month % 12 // 3 + 1
-            next_point = np.array([
-                next_scaled,
-                np.sin(2 * np.pi * next_month / 12),
-                np.cos(2 * np.pi * next_month / 12),
-                next_year_norm,
-                np.sin(2 * np.pi * next_season / 4),
-                np.cos(2 * np.pi * next_season / 4)
-            ])
-            last_sequence = np.vstack([last_sequence[1:], next_point])
-            last_date = next_date
+        future_preds_inv = scaler_val.inverse_transform(np.array(future_preds).reshape(-1, 1)).flatten()
+        future_dates_str = [date.strftime("%Y-%m") for date in future_dates]
+        dates_test = df["date"].iloc[look_back:look_back + len(y_true_inv)]
+        dates_test_str = dates_test.dt.strftime("%Y-%m").tolist()
 
-        future_predictions_rescaled = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
-        future_dates = pd.date_range(start=df["datetime"].iloc[-1] + pd.DateOffset(months=1), periods=periode, freq="MS")
+
+        best_params["time_step"] = look_back
+        best_params["loss"] = "mean_squared_error (mse)"
+        best_params["learning_rate"] = 0.001
+        best_params["split_ratio"] = 1.0
 
         return JSONResponse(content={
             "message": "Prédiction GRU effectuée avec succès",
             "nom_de_la_methode": nommethode,
             "meilleur_essai": study.best_trial.number,
-            "valeur_objectif_mape": round(study.best_trial.value * 100, 2),
             "meilleurs_parametres": {
                 **best_params,
-                "taux_erreur_rmse": round(rmse, 4),
-                "taux_erreur_mae": round(mae, 4),
-                "taux_erreur_smape": round(smape, 4)
+                "taux_erreur_rmse": round(rmse(y_true_inv, y_pred_inv), 4),
+                "taux_erreur_mae": round(mae(y_true_inv, y_pred_inv), 4),
+                "taux_erreur_smape": round(smape(y_true_inv, y_pred_inv), 4)
             },
-            
-            "data_len":longueur_dataset,
-
-            "taux_erreur_mape": round(mape * 100, 2),
-            "dates": [d.strftime('%Y-%m') for d in future_dates],
-            "valeurs": future_predictions_rescaled.flatten().tolist(),
-            "donnee_admin": donnees_admin
+            "data_len": len(donnees_admin),
+            "taux_erreur_mape": round(mape(y_true_inv, y_pred_inv), 2),
+            "dates": future_dates_str,
+            "valeurs": future_preds_inv.tolist(),
+            "donnee_admin": donnees_admin,
+            "valeurs_reelles_test": y_true_inv.flatten().tolist(),
+            "valeurs_predites_test": y_pred_inv.flatten().tolist(),
+            "dates_test_reelles": dates_test_str,
+            "dates_test_predites": dates_test_str  # identiques car alignées
         })
-
     except Exception as e:
         import traceback
         traceback.print_exc()

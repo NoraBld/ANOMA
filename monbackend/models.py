@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime,Date, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
-
+from datetime import datetime 
 
 
 class Admin(Base):
@@ -17,21 +17,24 @@ class Admin(Base):
 
     predictions = relationship("Prediction", back_populates="admin")
 
-
 class Deeplearning(Base):
     __tablename__ = "deeplearning"
     id_deeplearning = Column(Integer, primary_key=True, index=True)
-    units = Column(Integer)
+    units1 = Column(Integer)
+    units2 = Column(Integer)
+    units3 = Column(Integer)
+
     epochs = Column(Integer)
     batch_size = Column(Integer)
     time_step = Column(Integer)
-    patience = Column(Integer)
+    
     loss = Column(String(100))
     dropout = Column(Float)
     learning_rate = Column(Float)
     split_ratio = Column(Float)
     mape = Column(Float)
-
+    modele_path = Column(String)
+    patience = Column(Integer)
     predictions = relationship("Prediction", back_populates="deeplearning")
     clients = relationship("Client", back_populates="deeplearning")
 
@@ -77,7 +80,8 @@ class Prediction(Base):
     __tablename__ = "prediction"
     id_prediction = Column(Integer, primary_key=True, index=True)
     periode = Column(Integer)
-    date_creation = Column(Date)
+   
+    date_creation = Column(DateTime, default=datetime.now)
 
     id_admin = Column(Integer, ForeignKey("admin.id"))
     id_deeplearning = Column(Integer, ForeignKey("deeplearning.id_deeplearning"))
@@ -107,6 +111,9 @@ class Consommation(Base):
 
     id_client = Column(Integer, ForeignKey("clients.id"), nullable=True)
     client = relationship("Client", back_populates="consommations")
+
+
+
 
 
 class Exogene(Base):

@@ -2,7 +2,7 @@ import React from 'react';
 import CustomSidebarCl from '../components/CustomSidebarCl';
 import { ProSidebarProvider } from 'react-pro-sidebar';
 import Graphe from '../components/visualisationComponent/graphe';
-import BottomStats from '../components/visualisationComponent/BottomStats';
+// import BottomStats from '../components/visualisationComponent/BottomStats';
 import ConsumptionTable from '../components/visualisationComponent/ConsumptionTable';
 import ConsumptionBarChart from '../components/visualisationComponent/ConsumptionBarChart';
 
@@ -19,13 +19,11 @@ const VisualisationCl = () => {
         <div className="flex-1 ml-[250px] p-6 overflow-auto">
           <Graphe />
 
-          <div className="flex flex-col lg:flex-row lg:space-x-4 space-y-4 lg:space-y-0 mt-6">
-            <div className="w-full lg:w-1/2 p-4 text-white rounded-md">
-              <BottomStats />
-            </div>
-            <div className="w-full lg:w-1/2 p-4 text-white rounded-md">
+          <div className="flex-1  p-6 overflow-auto">
+            
+            
               <ConsumptionTable />
-            </div>
+            
           </div>
 
           {/* Histogramme en dessous */}

@@ -1,4 +1,4 @@
-from routers import  ajouterClient , modifierClient ,recherche, rechercheClient , auth , client_profile , consommation , adminProfile, graphepred
+from routers import  ajouterClient , modifierClient ,gruClient,recherche, rechercheClient , auth , client_profile ,exogene, consommation , adminProfile, graphepred, comparaison
 from fastapi.staticfiles import StaticFiles
 
 
@@ -55,6 +55,9 @@ app.include_router(consommation.router)
 app.include_router(adminProfile.router)
 app.include_router(graphepred.router)
 app.include_router(recherche.router)
+app.include_router(comparaison.router)
+app.include_router(exogene.router)
+app.include_router(gruClient.router)
 def get_db():
     db = SessionLocal()
     try:

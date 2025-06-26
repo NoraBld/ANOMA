@@ -33,21 +33,24 @@ def get_last_prediction(db: Session = Depends(get_db)):
         }
     elif last_prediction.id_deeplearning:
         dl = db.query(Deeplearning).filter(Deeplearning.id_deeplearning == last_prediction.id_deeplearning).first()
-        result["method"] = "LSTM"
-        result["params"] = {
-            "epochs": dl.epochs,
-            "units": dl.units,
-            "batch_size": dl.batch_size,
-            "time_step": dl.time_step,
-            "patience": dl.patience,
-            "dropout": dl.dropout,
-            "learning_rate": dl.learning_rate,
-            "split_ratio": dl.split_ratio,
-            "mape": dl.mape
-        }
+
+        result["method"] = "GRU"
+
+        if dl:
+            result["params"] = {
+                "units": f"{dl.units1}-{dl.units2}-{dl.units3}",
+                "epochs": dl.epochs,
+                "batch_size": dl.batch_size,
+                "time_step": dl.time_step,
+                
+                "dropout": dl.dropout,
+                "learning_rate": dl.learning_rate,
+                "split_ratio": dl.split_ratio,
+                "mape": dl.mape
+            }
+        else:
+            result["params"] = {
+                "mape": 0
+            }
 
     return result
-
-
-
-

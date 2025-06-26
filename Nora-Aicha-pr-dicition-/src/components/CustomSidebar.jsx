@@ -1,8 +1,16 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Sidebar as ProSidebar, Menu, MenuItem, useProSidebar } from 'react-pro-sidebar';
-import { FaBars, FaHome, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import {
+  FaBars,
+  FaHome,
+  FaUser,
+  FaCog,
+  FaSignOutAlt,
+  FaChartLine,
+  FaHistory,
+  FaUsers
+} from 'react-icons/fa';
 import '../assets/css/CustomSidebar.css';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -14,22 +22,18 @@ function CustomSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
   const [adminData, setAdminData] = useState(null);
 
-
-  const handleResize = () => {
-    const mobile = window.innerWidth < 768;
-    setIsMobile(mobile);
-    setIsCollapsed(mobile);
-    if (mobile) {
-      collapseSidebar();
-    }
-  };
-
   useEffect(() => {
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setIsCollapsed(mobile);
+      if (mobile) collapseSidebar();
+    };
 
+    window.addEventListener('resize', handleResize);
+    handleResize(); // initialize on mount
+    return () => window.removeEventListener('resize', handleResize);
+  }, [collapseSidebar]);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -55,12 +59,10 @@ function CustomSidebar() {
     fetchAdminData();
   }, []);
 
-
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     collapseSidebar();
   };
-
 
   const handleLogout = () => {
     const confirmLogout = window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?');
@@ -73,7 +75,6 @@ function CustomSidebar() {
   const profileImage = adminData?.logo
     ? `http://localhost:8000${adminData.logo}?v=${new Date().getTime()}`
     : null;
-
 
   const menuStyles = {
     button: {
@@ -94,10 +95,8 @@ function CustomSidebar() {
   return (
     <>
       {isMobile && (
-
         <button
           onClick={toggleSidebar}
-
           className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded sm:hidden"
         >
           <FaBars />
@@ -107,7 +106,6 @@ function CustomSidebar() {
       <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <Menu menuItemStyles={menuStyles}>
           <div style={{ height: '60px' }}></div>
-
 
           <MenuItem
             component={<Link to="/profile" />}
@@ -131,20 +129,33 @@ function CustomSidebar() {
             Profil
           </MenuItem>
 
-          <MenuItem icon={<FaHome />} component={<Link to="/dashboard" />}>Dashboard</MenuItem>
-          <MenuItem icon={<FaHome />} component={<Link to="/dashboardCl" />}>Dashboard de Prédiction</MenuItem>
+          <MenuItem icon={<FaHome />} component={<Link to="/dashboard" />}>
+            Dashboard
+          </MenuItem>
 
-          <MenuItem icon={<FaCog />} component={<Link to="/prediction" />}>Prédiction</MenuItem>
-          <MenuItem icon={<FaUser />} component={<Link to="/historique" />}>Historique</MenuItem>
-          <MenuItem icon={<FaUser />} component={<Link to="/Client" />}>Client</MenuItem>
+          <MenuItem icon={<FaChartLine />} component={<Link to="/dashboardCl" />}>
+            Dashboard de Prédiction
+          </MenuItem>
+
+          <MenuItem icon={<FaCog />} component={<Link to="/prediction" />}>
+            Prédiction
+          </MenuItem>
+
+          <MenuItem icon={<FaHistory />} component={<Link to="/historique" />}>
+            Historique
+          </MenuItem>
+
+          <MenuItem icon={<FaUsers />} component={<Link to="/Client" />}>
+            Clients
+          </MenuItem>
         </Menu>
 
         <div style={{ flexGrow: 1 }}></div>
 
         <Menu menuItemStyles={menuStyles}>
-
-          <MenuItem icon={<FaSignOutAlt />} onClick={handleLogout}>Déconnexion</MenuItem>
-
+          <MenuItem icon={<FaSignOutAlt />} onClick={handleLogout}>
+            Déconnexion
+          </MenuItem>
         </Menu>
       </div>
     </>

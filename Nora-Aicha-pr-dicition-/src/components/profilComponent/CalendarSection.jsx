@@ -3,13 +3,6 @@ import React from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
-// On définit ici deux dates par mois jusqu'à juin 2025
-const defaultPredictionDates = [
-  new Date(2025, 2, 10), new Date(2025, 2, 22),  // Mars
-  new Date(2025, 3, 8),  new Date(2025, 3, 20),  // Avril
-  new Date(2025, 4, 5),  new Date(2025, 4, 18),  // Mai
-  new Date(2025, 5, 2),  new Date(2025, 5, 24),  // Juin
-];
 
 const CalendarSection = ({ predictionDates = defaultPredictionDates, selectedDate, onDateChange }) => {
   const customTileClass = ({ date }) => {

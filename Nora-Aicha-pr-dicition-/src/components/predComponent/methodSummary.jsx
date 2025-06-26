@@ -53,7 +53,7 @@ const MethodSummary = ({ sommaire }) => {
     <p>batch_size : {item.batch_size}</p>
     <p>loss : {item.loss}</p>
     <p>time_step : {item.time_step}</p>
-    <p>patience : {item.patience}</p>
+    
     <p>split_ratio : {item.split_ratio}</p>
   </div>
 )}
